@@ -1,0 +1,20 @@
+{
+  "name": "ego-playwright",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:headed": "cross-env HEADLESS=false cucumber-js",
+    "test:headless": "cross-env HEADLESS=true cucumber-js",
+    "test:homepage": "cross-env HEADLESS=false cucumber-js --require features/signup.steps.js"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "^12.3.0",
+    "chai": "^5.1.0",
+    "cross-env": "^7.0.3",
+    "playwright": "^1.57.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}
