@@ -1,5 +1,3 @@
-// locators.js
-
 const LoginLocators = {
   accountIcon: '[aria-label="Account"]',
   emailInput: '[data-testid="email-input"]',

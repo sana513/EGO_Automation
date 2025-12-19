@@ -1,6 +1,7 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const ProductListingPage = require('../../pages/PLP_Page');
 
+
 Given('the user is on the product listing page', async function () {
   this.plp = new ProductListingPage(this.page);
   await this.plp.navigateToPLP();

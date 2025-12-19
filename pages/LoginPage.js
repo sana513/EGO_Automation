@@ -1,5 +1,5 @@
 const BasePage = require("./BasePage");
-const locators = require("../locators/loginLocators");
+const locators = require("../locators/EGO_Locators").LoginLocators;
 
 class LoginPage extends BasePage {
   constructor(page) {
