@@ -26,3 +26,10 @@ npx cucumber-js features/EGO_Features.feature \
   --require features/support/hooks.js \
   --tags @plp
 
+   npx cucumber-js features/EGO_Features.feature \
+  --require features/step-definitions/common.steps.js \
+  --require features/step-definitions/PDP.steps.js \
+  --require features/support/world.js \
+  --require features/support/hooks.js \
+  --tags @pdp
+

@@ -66,12 +66,12 @@ Scenario: Open specific product by index
 
   # ===== PDP / ADD TO CART =====
   @pdp @addtocart
-  Scenario: Add product to cart from PDP
-    Given the user is on the product detail page
-    When the user clicks on the "Select a Size" button
-    And the user selects a size from the available options "US 0-2 (S)"
-    And the user adds the product to the shopping cart
-    Then the mini cart should be visible
+  Scenario: Add a random product to the cart
+    Given I open the website for "us"
+    And I open a random product from PLP
+    When I select any available size
+    And I add the product to the bag
+    Then I open the cart page
 
   # ===== CHECKOUT =====
   @checkout

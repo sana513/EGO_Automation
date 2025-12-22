@@ -9,35 +9,30 @@ class ProductListingPage extends BasePage {
     this.loadMoreButton = '#pagination-next';
   }
 
-  // Navigate to PLP and handle popup
   async navigateToPLP(url = 'https://vsfstage.egoshoes.com/us/c/clothing') {
     await this.page.context().clearCookies();
     await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await expect(this.page).toHaveURL(/\/clothing/);
     await this.closePopupIfPresent();
 
-    // Wait until at least one product is visible
     await this.page.waitForFunction(
       (selector) => document.querySelectorAll(selector).length > 0,
       this.productTile
     );
   }
 
-  // Verify product tiles exist
   async verifyProductsVisible() {
     const products = this.page.locator(this.productTile);
     const count = await products.count();
-    expect(count).toBeGreaterThan(0); // At least one product
+    expect(count).toBeGreaterThan(0); 
   }
 
-  // Load all products dynamically
   async loadMoreProducts() {
     let previousCount = 0;
 
     while (true) {
       const currentCount = await this.page.locator(this.productTile).count();
 
-      // Break if no new products loaded
       if (currentCount === previousCount) break;
 
       previousCount = currentCount;
@@ -48,7 +43,6 @@ class ProductListingPage extends BasePage {
       await loadMore.scrollIntoViewIfNeeded();
       await loadMore.click();
 
-      // Wait dynamically until new products load
       await this.page.waitForFunction(
         (selector, count) =>
           document.querySelectorAll(selector).length > count,
@@ -64,7 +58,7 @@ class ProductListingPage extends BasePage {
   if (count === 0) throw new Error("No products found on PLP");
 
   const randomIndex = Math.floor(Math.random() * count);
-  const product = products.nth(randomIndex); // renamed correctly
+  const product = products.nth(randomIndex); 
   await product.scrollIntoViewIfNeeded();
 
   await Promise.all([
