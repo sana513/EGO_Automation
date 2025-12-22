@@ -18,3 +18,11 @@ npx cucumber-js features/EGO_Features.feature \
   --require features/support/hooks.js \
   --tags @checkout
 
+
+  npx cucumber-js features/EGO_Features.feature \
+  --require features/step-definitions/common.steps.js \
+  --require features/step-definitions/PLP.steps.js \
+  --require features/support/world.js \
+  --require features/support/hooks.js \
+  --tags @plp
+

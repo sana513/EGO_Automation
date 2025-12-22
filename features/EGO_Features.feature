@@ -45,16 +45,24 @@ Feature: Full E-commerce End-to-End Flow
     And I should see the "33% OFF FOR YOU" promotional banner
 
   # ===== PLP =====
-  @plp
-  Scenario: Verify products on PLP
-    Given the user is on the product listing page
-    Then product tiles should be visible
-    When the user scrolls down and clicks load more until all products are loaded
+ @plp
+Scenario: Verify products on PLP
+  Given I open the PLP page
+  Then all product tiles should be visible
+  When I scroll down and click load more until all products are loaded
 
-  @plp
-  Scenario: Open first product from PLP
-    Given the user is on the product listing page
-    When the user clicks on the first product
+@plp
+Scenario: Open first product from PLP
+  Given I open the PLP page
+  When I open the first product
+  Then I should be on the PDP page
+
+@plp
+Scenario: Open specific product by index
+  Given I open the PLP page
+  When I open product number 3
+  Then I should be on the PDP page
+
 
   # ===== PDP / ADD TO CART =====
   @pdp @addtocart
