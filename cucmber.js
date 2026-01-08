@@ -7,6 +7,7 @@ module.exports = {
     ],
     publishQuiet: true,
     format: ["progress"],
+
      
   }
 };

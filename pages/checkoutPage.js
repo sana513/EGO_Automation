@@ -1,6 +1,6 @@
 const { expect } = require('@playwright/test');
-const locators = require('./CheckoutLocators');
-const BasePage = require('../base/BasePage');
+const locators = require('../locators/EGO_Locators').CheckoutLocators;
+const BasePage = require('../pages/BasePage');
 
 class CheckoutPage extends BasePage {
     constructor(page) {

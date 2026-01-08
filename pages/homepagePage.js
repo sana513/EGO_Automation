@@ -1,5 +1,5 @@
 const { expect } = require('@playwright/test');
-const HomePageLocators = require('../locators/homepageLocators');
+const HomePageLocators = require('../locators/EGO_Locators');
 
 class HomePage {
   constructor(page) {

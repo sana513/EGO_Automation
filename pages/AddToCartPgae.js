@@ -1,5 +1,5 @@
 const {expect} = require("@playwright/test");
-const addToCartLocators = require("../locators/addToCartLocators");
+const addToCartLocators = require("../locators/EGO_Locators").AddToCartLocators;
 
 class AddToCartPage {
     constructor(page) {

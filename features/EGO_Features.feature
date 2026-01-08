@@ -3,14 +3,8 @@ Feature: Full E-commerce End-to-End Flow
   Background:
     Given I open the website for "us"
 
-  # ===== LOGIN =====
-  @login
-  Scenario: Login to my account on US site
-    When I perform login with valid credentials
-    Then I should be redirected to my account dashboard
-
-  # ===== REGISTRATION =====
-  @registration
+    # ===== REGISTRATION =====
+  @registration @e2e
   Scenario: Complete manual address registration
     Given I navigate to the registration page
     When I enter a unique email for registration
@@ -34,8 +28,14 @@ Feature: Full E-commerce End-to-End Flow
     Then I should be successfully registered
     And I should be redirected to my account
 
+  # ===== LOGIN =====
+  @login @e2e
+  Scenario: Login to my account on US site
+    When I perform login with valid credentials
+    Then I should be redirected to my account dashboard
+
   # ===== HOMEPAGE =====
-  @homepage
+  @homepage @e2e
   Scenario: Verify homepage elements
     Given I navigate to the homepage
     And I decline the modal if it appears
@@ -45,19 +45,19 @@ Feature: Full E-commerce End-to-End Flow
     And I should see the "33% OFF FOR YOU" promotional banner
 
   # ===== PLP =====
- @plp
+ @plp @e2e
 Scenario: Verify products on PLP
   Given I open the PLP page
   Then all product tiles should be visible
   When I scroll down and click load more until all products are loaded
 
-@plp
+@plp @e2e
 Scenario: Open first product from PLP
   Given I open the PLP page
   When I open the first product
   Then I should be on the PDP page
 
-@plp
+@plp @e2e
 Scenario: Open specific product by index
   Given I open the PLP page
   When I open product number 3
@@ -65,7 +65,7 @@ Scenario: Open specific product by index
 
 
   # ===== PDP / ADD TO CART =====
-  @pdp @addtocart
+  @pdp @addtocart @e2e
   Scenario: Add a random product to the cart
     Given I open the website for "us"
     And I open a random product from PLP
@@ -74,7 +74,7 @@ Scenario: Open specific product by index
     Then I open the cart page
 
   # ===== CHECKOUT =====
-  @checkout
+  @checkout @e2e
   Scenario: Successful checkout with valid details
     Given the user has added a product to the cart
     And navigates to the checkout page

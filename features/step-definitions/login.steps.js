@@ -1,6 +1,6 @@
 const { Given, When, Then } = require("@cucumber/cucumber");
 const { expect } = require("chai");
-const LoginPage = require("../../pages/loginPage");
+const LoginPage = require("../../pages/LoginPage");
 
 Given("I open the website for {string}", async function (locale) {
   this.loginPage = new LoginPage(this.page);

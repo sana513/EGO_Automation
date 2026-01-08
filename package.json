@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "test": "cucumber-js",
-    "test:headed": "cross-env HEADLESS=false cucumber-js",
-    "test:headless": "cross-env HEADLESS=true cucumber-js",
-    "test:homepage": "cross-env HEADLESS=false cucumber-js --require features/signup.steps.js"
+    "test:e2e": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/*.js --require features/support/world.js --require features/support/hooks.js --tags @e2e",
+    "test:login": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/login.steps.js --require features/support/world.js --require features/support/hooks.js --tags @login",
+    "test:registration": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/registration.steps.js --require features/support/world.js --require features/support/hooks.js --tags @registration",
+    "test:homepage": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/homepage.steps.js --require features/support/world.js --require features/support/hooks.js --tags @homepage",
+    "test:plp": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/plp.steps.js --require features/support/world.js --require features/support/hooks.js --tags @plp",
+    "test:pdp-addtocart": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/pdpAddToCart.steps.js --require features/support/world.js --require features/support/hooks.js --tags '@pdp and @addtocart'",
+    "test:checkout": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/checkout.steps.js --require features/support/world.js --require features/support/hooks.js --tags @checkout"
   },
   "dependencies": {
     "@cucumber/cucumber": "^12.3.0",
