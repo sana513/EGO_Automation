@@ -10,7 +10,7 @@
     "test:plp": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/PLP.steps.js --require features/step-definitions/common.steps.js --require features/support/world.js --require features/support/hooks.js --tags @plp",
     "test:pdp": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/common.steps.js --require features/step-definitions/PDP.steps.js --require features/support/world.js --require features/support/hooks.js --tags @pdp",
     "test:addtocart": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/addToCart.steps.js --require features/support/world.js --require features/support/hooks.js --tags @addtocart",
-    "test:checkout": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/checkout.steps.js --require features/support/world.js --require features/support/hooks.js --tags @checkout"
+ "test:checkout": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/checkout.steps.js --require features/support/world.js --require features/support/hooks.js --tags @checkout"
   },
   "dependencies": {
     "@cucumber/cucumber": "^12.3.0",
