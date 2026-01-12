@@ -37,7 +37,7 @@ When('I update the quantity randomly', async function () {
 
 When('I update the product size randomly', async function () {
   await addToCart.updateSizeRandomly();
-}); 
+});
 When('I add the product to wishlist', async function () {
   await addToCart.addProductToWishlist();
 });

@@ -1,6 +1,6 @@
 // features/support/world.js
 const { setWorldConstructor, BeforeAll, AfterAll, Before, After, setDefaultTimeout } = require("@cucumber/cucumber");
-const { chromium } = require("playwright");
+const { webkit } = require("playwright");
 
 setDefaultTimeout(60000);
 
@@ -20,16 +20,16 @@ let page;
 
 BeforeAll(async function () {
   // Launch browser once for all scenarios
-  browser = await chromium.launch({ headless: false, slowMo: 1200 });
+  browser = await webkit.launch({ headless: false, slowMo: 1200 });
   context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
   page = await context.newPage();
 });
 
 AfterAll(async function () {
   // Close browser once after all scenarios
-  await page?.close();
-  await context?.close();
-  await browser?.close();
+  // await page?.close();
+  // await context?.close();
+  // await browser?.close();
 });
 
 Before(function () {

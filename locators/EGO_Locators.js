@@ -52,7 +52,7 @@ const HomePageLocators = {
   USER_ICON: 'svg[id="Acount icon"]',
   CART_ICON: 'svg[id="Bag icon"]',
   STORE_SWITCHER: 'button[class*="store"], button:has-text("USD")',
-  NAV_CATEGORY: (name) => `nav >> text="${name}"`, 
+  NAV_CATEGORY: (name) => `nav >> text="${name}"`,
   WHATS_HOT_SECTION: '#whats-hot-section',
   PRODUCT_CARD: '.product-card',
   PRODUCT_NAME: '.product-card .product-name',
@@ -65,13 +65,13 @@ const HomePageLocators = {
   getProductByName: (name) => `:has-text("${name}")`,
 };
 const AddToCartLocators = {
-  Update_quantity : '[data-testid="cart-product-card-quantity-select"]',
+  Update_quantity: '[data-testid="cart-product-card-quantity-select"]',
   Update_size: '[data-testid="cart-product-card-size-select"]',
   Delete_Product: '[data-testid="cart-product-card-remove-button !align-top"]',
   Add_to_Wishlist: 'button[aria-label="Add to Wishlist"]',
-  Applied_Coupon: 'input[data-testid="input-field"][aria-label="Discount Code"]',
+  Coupon_Input: 'input#discont-field[data-testid="input-field"]',
   Submit_button: '[data-testid="button"][aria-label="Submit"]',
-  Checkout_button: '[data-testid="go-to-checkout"]'
+  Checkout_button: '[data-testid="go-to-checkout"][aria-label="Go to Checkout"]'
 };
 
 const CheckoutLocators = {

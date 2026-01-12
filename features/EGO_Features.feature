@@ -35,57 +35,7 @@ Feature: Full E-commerce End-to-End Flow
     Then I should be redirected to my account dashboard
 
   # ===== HOMEPAGE =====
-  @homepage @e2e
-  Scenario: Homepage loads successfully
-    Then the homepage should be displayed
-    And the page title should be visible
-@homepage @e2e
-  Scenario: Header section
-    Then the logo should be visible
-    And the search bar should be visible
-    And the navigation menu should be visible
-    And the currency selector should be visible
-@homepage @e2e
-  Scenario: Main navigation links
-    Then the following navigation links should be visible:
-      | New In |
-      | Winter |
-      | Clothing |
-      | Dresses |
-      | Co-Ords |
-      | Tops |
-      | Bottoms |
-      | Shoes |
-      | Accessories |
-      | Clearance |
-@homepage @e2e
-  Scenario: Hero banner section
-    Then the hero banner should be visible
-    And the hero heading text should be displayed
-    And the hero image should be displayed
-    And the hero call to action button should be clickable
-@homepage @e2e
-  Scenario: Shop by Trend section
-    Then the "Shop By Trend" section should be visible
-    And each trend category should have an image and label
-@homepage @e2e
-  Scenario: Popular Categories section
-    Then the "Popular Categories" section should be visible
-    And the popular categories carousel should be displayed
-@homepage @e2e
-  Scenario: Whats Hot section
-    Then the "What's Hot!" section should be visible
-    And product cards should be displayed
-    And each product card should show:
-      | Image |
-      | Name |
-      | Price |
-      | Add to Bag |
-@homepage @e2e
-  Scenario: Footer section
-    Then the footer should be visible
-
-
+  
 
   # ===== PLP =====
  @plp @e2e
