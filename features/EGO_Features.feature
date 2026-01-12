@@ -36,13 +36,56 @@ Feature: Full E-commerce End-to-End Flow
 
   # ===== HOMEPAGE =====
   @homepage @e2e
-  Scenario: Verify homepage elements
-    Given I navigate to the homepage
-    And I decline the modal if it appears
-    Then I should see the site logo
-    And I should see the search bar
-    And I should see all main navigation categories
-    And I should see the "33% OFF FOR YOU" promotional banner
+  Scenario: Homepage loads successfully
+    Then the homepage should be displayed
+    And the page title should be visible
+@homepage @e2e
+  Scenario: Header section
+    Then the logo should be visible
+    And the search bar should be visible
+    And the navigation menu should be visible
+    And the currency selector should be visible
+@homepage @e2e
+  Scenario: Main navigation links
+    Then the following navigation links should be visible:
+      | New In |
+      | Winter |
+      | Clothing |
+      | Dresses |
+      | Co-Ords |
+      | Tops |
+      | Bottoms |
+      | Shoes |
+      | Accessories |
+      | Clearance |
+@homepage @e2e
+  Scenario: Hero banner section
+    Then the hero banner should be visible
+    And the hero heading text should be displayed
+    And the hero image should be displayed
+    And the hero call to action button should be clickable
+@homepage @e2e
+  Scenario: Shop by Trend section
+    Then the "Shop By Trend" section should be visible
+    And each trend category should have an image and label
+@homepage @e2e
+  Scenario: Popular Categories section
+    Then the "Popular Categories" section should be visible
+    And the popular categories carousel should be displayed
+@homepage @e2e
+  Scenario: Whats Hot section
+    Then the "What's Hot!" section should be visible
+    And product cards should be displayed
+    And each product card should show:
+      | Image |
+      | Name |
+      | Price |
+      | Add to Bag |
+@homepage @e2e
+  Scenario: Footer section
+    Then the footer should be visible
+
+
 
   # ===== PLP =====
  @plp @e2e
@@ -65,13 +108,26 @@ Scenario: Open specific product by index
 
 
   # ===== PDP / ADD TO CART =====
-  @pdp @addtocart @e2e
-  Scenario: Add a random product to the cart
-    Given I open the website for "us"
-    And I open a random product from PLP
-    When I select any available size
-    And I add the product to the bag
-    Then I open the cart page
+  @pdp 
+Scenario: Add a random product to the cart
+  Given I open the website for "us"
+  And I open a random product from PLP
+  When I select any available size
+  And I add the product to the bag
+  Then I open the cart page
+ # ===== ADD TO CART =====
+@addtocart @e2e
+Scenario: Update cart and proceed to checkout
+  Given I open the website for "us"
+  And I open a random product from PLP
+  When I select any available size
+  And I add the product to the bag
+  Then I open the cart page
+  When I update the quantity randomly
+  And I update the product size randomly
+  And I add the product to wishlist
+  And I apply the coupon code "R5D48EF48"
+  And I proceed to checkout
 
   # ===== CHECKOUT =====
   @checkout @e2e

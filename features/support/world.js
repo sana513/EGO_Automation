@@ -21,7 +21,7 @@ let page;
 BeforeAll(async function () {
   // Launch browser once for all scenarios
   browser = await chromium.launch({ headless: false, slowMo: 1200 });
-  context = await browser.newContext({ viewport: { width: 2500, height: 1800 } });
+  context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
   page = await context.newPage();
 });
 

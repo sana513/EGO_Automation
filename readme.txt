@@ -32,4 +32,10 @@ npx cucumber-js features/EGO_Features.feature \
   --require features/support/world.js \
   --require features/support/hooks.js \
   --tags @pdp
+   npx cucumber-js features/EGO_Features.feature \
+  --require features/step-definitions/common.steps.js \
+  --require features/step-definitions/homepage.steps.js \
+  --require features/support/world.js \
+  --require features/support/hooks.js \
+  --tags @homepage
 

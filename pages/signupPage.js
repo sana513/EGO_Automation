@@ -46,6 +46,7 @@ class SignupPage extends BasePage {
     this.submitButton = this.activeForm.locator(this.l.submitButton);
     this.country = this.activeForm.locator(this.l.country);
     this.enterAddressManually = this.activeForm.locator(this.l.enterAddressManually);
+
     this.dob = {
       day: this.activeForm.locator('select[data-testid="select-input"]').nth(0),
       month: this.activeForm.locator('select[data-testid="select-input"]').nth(1),
@@ -53,24 +54,28 @@ class SignupPage extends BasePage {
     };
   }
 
+  // Navigate to Signup Page
   async navigateToSignup() {
     if (!this.page) throw new Error("Page is not initialized");
+
+    // Clear previous session
     await this.page.context().clearCookies();
     await this.page.evaluate(() => localStorage.clear());
+
     await this.navigate("https://vsfstage.egoshoes.com/us");
 
-    // Wait for top-level elements before clicking
+    // Wait for navigation elements
     await this.accountIcon.waitFor({ state: "visible", timeout: 15000 });
     await this.accountIcon.click();
 
     await this.signupLink.waitFor({ state: "visible", timeout: 15000 });
     await this.signupLink.click();
 
-    // Wait for drawer to appear
     await this.page.waitForSelector('[data-testid="register-page"]', { timeout: 30000 });
     await this.setActiveForm();
   }
 
+  // Enter initial email
   async enterInitialEmail(email) {
     if (!this.activeForm) await this.setActiveForm();
 
@@ -82,34 +87,25 @@ class SignupPage extends BasePage {
     await continueBtn.waitFor({ state: "visible", timeout: 10000 });
     await continueBtn.click();
 
-    // Wait for first name input to appear after navigation
     await this.page.waitForSelector(this.l.firstName, { timeout: 30000 });
     await this.setActiveForm();
   }
+
   async enterUniqueEmail(email) {
-    if (!this.activeForm) await this.setActiveForm();
-    const emailInput = this.activeForm.locator(this.l.initialEmailInput);
-    await emailInput.waitFor({ state: "visible", timeout: 15000 });
-    await emailInput.fill(email);
-    const continueBtn = this.activeForm.locator(this.l.continueButton);
-    await continueBtn.waitFor({ state: "visible", timeout: 10000 });
-    await continueBtn.click();
-    await this.page.waitForSelector(this.l.firstName, { timeout: 30000 });
-    await this.setActiveForm();
+    await this.enterInitialEmail(email);
   }
+
   async clickContinue() {
     if (!this.activeForm) await this.setActiveForm();
     const continueBtn = this.activeForm.locator(this.l.continueButton);
     await continueBtn.waitFor({ state: "visible", timeout: 10000 });
     await continueBtn.click();
-
     await this.page.waitForSelector(this.l.firstName, { timeout: 15000 });
     await this.setActiveForm();
   }
 
   async fillPersonalDetails(details) {
     if (details["Email"]) await this.enterInitialEmail(details["Email"]);
-
     if (!this.activeForm) await this.setActiveForm();
 
     if (details["First Name"]) await this.firstNameInput.fill(details["First Name"]);
@@ -118,37 +114,44 @@ class SignupPage extends BasePage {
     if (details["Confirm Password"]) await this.confirmPasswordInput.fill(details["Confirm Password"]);
   }
 
+  // Safe DOB selection
   async setDOB() {
     if (!this.activeForm) await this.setActiveForm();
 
-    await this.dob.day.selectOption("11");
-    await this.dob.month.selectOption("December");
-    await this.dob.year.selectOption("1998");
+    const day = (Math.floor(Math.random() * 28) + 1).toString();
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const month = months[Math.floor(Math.random() * months.length)];
+    const year = (Math.floor(Math.random() * (2000-1950+1))+1950).toString();
+
+    // Wait & select with retries
+    await this.dob.day.waitFor({ state: "visible", timeout: 15000 });
+    await this.dob.day.selectOption(day);
+
+    await this.dob.month.waitFor({ state: "visible", timeout: 15000 });
+    await this.dob.month.selectOption({ label: month });
+
+    await this.dob.year.waitFor({ state: "visible", timeout: 15000 });
+    await this.dob.year.selectOption(year);
+
+    console.log(`Generated random DOB: ${day} ${month} ${year}`);
   }
 
   async selectCountry(countryName) {
     if (!this.activeForm) await this.setActiveForm();
-
     const countrySelect = this.activeForm.locator('select[data-testid="country-select"]');
-
     await countrySelect.waitFor({ state: "visible", timeout: 15000 });
     await countrySelect.selectOption({ label: countryName });
 
-    // ⬇ After selecting a country, the phone input becomes visible
     this.phoneNumber = this.activeForm.locator('[data-testid="phone-input"]');
-
     await this.phoneNumber.waitFor({ state: "visible", timeout: 15000 });
   }
 
   async enterPhoneNumber(phoneNumber) {
     if (!this.activeForm) await this.setActiveForm();
-
     const phoneInput = this.activeForm.locator('[data-testid="phone-input"]');
     await phoneInput.waitFor({ state: "visible", timeout: 15000 });
-
     await phoneInput.fill(phoneNumber);
   }
-
 
   async chooseManualAddress() {
     if (!this.activeForm) await this.setActiveForm();
@@ -174,16 +177,10 @@ class SignupPage extends BasePage {
 
   async disableMarketing() {
     const checkboxes = this.page.locator('[data-testid="checkbox"]');
-
     const count = await checkboxes.count();
-
     for (let i = 0; i < count; i++) {
       const checkbox = checkboxes.nth(i);
-      const isChecked = await checkbox.isChecked();
-
-      if (isChecked) {
-        await checkbox.uncheck();
-      }
+      if (await checkbox.isChecked()) await checkbox.uncheck();
     }
   }
 
@@ -192,16 +189,6 @@ class SignupPage extends BasePage {
     await this.submitButton.waitFor({ state: 'visible', timeout: 15000 });
     await this.submitButton.click();
   }
-
-  // async getErrorMessage() {
-  //   if (!this.activeForm) await this.setActiveForm();
-  //   return (await this.errorMessage.first().textContent())?.trim() || '';
-  // }
-
-  // async isRegistered() {
-  //   await this.page.waitForLoadState('networkidle').catch(() => {});
-  //   return this.page.url().includes("my-account");
-  // }
 }
 
 module.exports = SignupPage;
