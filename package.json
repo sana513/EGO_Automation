@@ -8,8 +8,9 @@
     "test:registration": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/common.steps.js --require features/step-definitions/signup.steps.js --require features/support/world.js --require features/support/hooks.js --tags @registration",
     "test:homepage": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/homepage.steps.js --require features/support/world.js --require features/support/hooks.js --tags @homepage",
     "test:plp": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/PLP.steps.js --require features/support/world.js --require features/support/hooks.js --tags @plp",
-    "test:pdp-addtocart": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/PDP.steps.js --require features/support/world.js --require features/support/hooks.js --tags '@pdp and @addtocart'",
-    "test:checkout": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/checkout.steps.js --require features/support/world.js --require features/support/hooks.js --tags @checkout"
+    "test:pdp": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/common.steps.js --require features/step-definitions/PDP.steps.js --require features/support/world.js --require features/support/hooks.js --tags @pdp",
+    "test:addtocart": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/addToCart.steps.js --require features/support/world.js --require features/support/hooks.js --tags @addtocart",
+ "test:checkout": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require features/step-definitions/checkout.steps.js --require features/support/world.js --require features/support/hooks.js --tags @checkout"
   },
   "dependencies": {
     "@cucumber/cucumber": "^12.3.0",

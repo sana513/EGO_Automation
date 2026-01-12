@@ -47,26 +47,31 @@ const SignupLocators = {
 };
 
 const HomePageLocators = {
-  modal: {
-    BUTTON2_WRAPPER: '#button2_wrapper',
-    BUTTON2: '#button2',
-  },
   LOGO: '[data-testid="logo"]',
-  SEARCH_BAR: 'input[data-testid="input-field"]:nth-child(0)',
+  SEARCH_BAR: 'input[data-testid="input-field"][aria-label="Search"]:visible',
   USER_ICON: 'svg[id="Acount icon"]',
   CART_ICON: 'svg[id="Bag icon"]',
   STORE_SWITCHER: 'button[class*="store"], button:has-text("USD")',
-  // Dynamic selector generators
+  NAV_CATEGORY: (name) => `nav >> text="${name}"`, 
+  WHATS_HOT_SECTION: '#whats-hot-section',
+  PRODUCT_CARD: '.product-card',
+  PRODUCT_NAME: '.product-card .product-name',
+  PRODUCT_PRICE: '.product-card .product-price',
+  ADD_BUTTON: '.product-card button:has-text("Add")',
+
+  // Dynamic selectors
   getCategoryLink: (text) => `a[data-v-497370f6]:has-text("${text}")`,
   getProductByIndex: (index) => `[class*="product-card"]:nth(${index})`,
-  getProductByName: (name) => `:has-text("${name}")`
+  getProductByName: (name) => `:has-text("${name}")`,
 };
 const AddToCartLocators = {
-  SELECT_SIZE_BUTTON: 'span.uppercase:has-text("Select Size"):nth-child(0)',
-  SIZE_OPTION: (size) => `button:has-text("${size}")`,
-  ADD_TO_BAG_BUTTON: '[data-testid="add-to-bag"]:nth-child(0)',
-  ADD_TO_CART_CONFIRMATION: '[data-testid="add-to-cart-confirmation"]',
-  POPUP_CLOSE_BTN: 'button[data-testid="modal-close"]'
+  Update_quantity : '[data-testid="cart-product-card-quantity-select"]',
+  Update_size: '[data-testid="cart-product-card-size-select"]',
+  Delete_Product: '[data-testid="cart-product-card-remove-button !align-top"]',
+  Add_to_Wishlist: 'button[aria-label="Add to Wishlist"]',
+  Applied_Coupon: 'input[data-testid="input-field"][aria-label="Discount Code"]',
+  Submit_button: '[data-testid="button"][aria-label="Submit"]',
+  Checkout_button: '[data-testid="go-to-checkout"]'
 };
 
 const CheckoutLocators = {

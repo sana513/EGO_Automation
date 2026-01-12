@@ -13,7 +13,7 @@ class ProductListingPage extends BasePage {
     await this.page.context().clearCookies();
     await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await expect(this.page).toHaveURL(/\/clothing/);
-    await this.closePopupIfPresent();
+    await this.closeModalIfPresent();
 
     await this.page.waitForFunction(
       (selector) => document.querySelectorAll(selector).length > 0,

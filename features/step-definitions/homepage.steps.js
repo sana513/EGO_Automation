@@ -4,127 +4,107 @@ const HomePage = require('../../pages/homepagePage');
 
 let homePage;
 
-// ===== Background Steps =====
-Given('I navigate to the homepage', async function () {
+// ======== Navigate / Homepage Steps ========
+Given('I open the website for {string}', async function (region) {
   homePage = new HomePage(this.page);
-  await homePage.goToHomePage('https://vsfstage.egoshoes.com/us/'); // replace with actual URL
-});
 
-Given('I decline the modal if it appears', async function () {
-  const modalSelector = 'div.modal button.close';
-  const modal = await this.page.$(modalSelector);
-  if (modal) {
-    await modal.click();
-  }
-});
-
-// ===== Header Assertions =====
-Then('I should see the site logo', async function () {
-  await homePage.clickLogo();
-});
-
-Then('I should see the search bar', async function () {
-  await homePage.verifySearchBarVisible();
-});
-
-Then('I should see all main navigation categories', async function () {
-  const categories = ['New In','Winter','Clothing','Dresses','Co Ords','Tops','Bottoms','Shoes','Accessories','Sale'];
-  for (const cat of categories) {
-    await homePage.verifyCategoryVisible(cat);
-  }
-});
-
-Then('I should see the {string} banner', async function(bannerText) {
-  await homePage.verifyBannerVisible(bannerText); 
-});
-
-// ===== Main Category Steps =====
-When('I click on the main category {string}', async function(categoryName) {
-  await homePage.clickMainCategory(categoryName);
-});
-
-Then('I should see the following subcategories:', async function(dataTable) {
-  const subcategories = dataTable.raw().flat();
-  for (const sub of subcategories) {
-    await homePage.verifyCategoryVisible(sub);
-  }
-});
-
-// ===== Main Banner Steps =====
-When('I click on the main banner {string}', async function(bannerName) {
-  await homePage.clickMainBannerByName(bannerName);
-});
-
-Then('I should be navigated to the {string} page', async function(pageName) {
-  let expectedUrlPart;
-  switch (pageName) {
-    case 'New In category':
-      expectedUrlPart = '/c/new-in';
+  let url;
+  switch (region.toLowerCase()) {
+    case 'us':
+      url = 'https://vsfstage.egoshoes.com/us/';
       break;
-    case 'Christmas':
-      expectedUrlPart = '/pages/christmas';
-      break;
-    case 'Sale':
-      expectedUrlPart = '/c/sale';
+    case 'uk':
+      url = 'https://vsfstage.egoshoes.com/uk/';
       break;
     default:
-      throw new Error(`Unknown page: ${pageName}`);
+      throw new Error(`Unknown region: ${region}`);
   }
-  await expect(this.page).toHaveURL(new RegExp(`${expectedUrlPart}`));
+
+  await homePage.goToHomePage(url); // modal-safe navigation
+});
+Then('the homepage should be displayed', async function () {
+  await expect(homePage.heroSection).toBeVisible();
+});
+Then('the page title should be visible', async () => {
+  await expect(homepage.page).toHaveTitle(/EGO/i);
 });
 
-// ===== What's Hot! Section =====
-When('I scroll to Whats Hot section', async function () {
-  await homePage.scrollToWhatsHotSection();
+Then('the logo should be visible', async () => {
+  await expect(homepage.logo).toBeVisible();
 });
 
-Then('I should see product cards with images in Whats Hot section', async function () {
-  await homePage.verifyWhatsHotProductsVisible();
+Then('the search bar should be visible', async () => {
+  await expect(homepage.searchBar).toBeVisible();
 });
 
-Then('I should see product names in Whats Hot section', async function () {
-  await homePage.verifyWhatsHotProductsVisible();
+Then('the navigation menu should be visible', async () => {
+  await expect(homepage.navMenu).toBeVisible();
 });
 
-Then('I should see product prices in Whats Hot section', async function () {
-  await homePage.verifyWhatsHotProductsVisible();
+Then('the currency selector should be visible', async () => {
+  await expect(homepage.currencySelector).toBeVisible();
 });
 
-Then('I should see "ADD" buttons in Whats Hot section', async function () {
-  await homePage.verifyWhatsHotProductsVisible();
+Then(
+  'the following navigation links should be visible:',
+  async (dataTable) => {
+    for (const link of dataTable.raw().flat()) {
+      await expect(homepage.getNavLink(link)).toBeVisible();
+    }
+  }
+);
+
+Then('the hero banner should be visible', async () => {
+  await expect(homepage.heroSection).toBeVisible();
 });
 
-// ===== Promotional Offers =====
-Then('I should see promotional offers displayed', async function() {
-  const promos = await this.page.$$('div.promo-banner');
-  if (promos.length === 0) throw new Error('No promotional offers found');
+Then('the hero heading text should be displayed', async () => {
+  await expect(homepage.heroHeading).toBeVisible();
 });
 
-Then('I should see discount percentages', async function() {
-  const discounts = await this.page.$$('div.promo-banner .discount');
-  if (discounts.length === 0) throw new Error('No discount percentages found');
+Then('the hero image should be displayed', async () => {
+  await expect(homepage.heroImage).toBeVisible();
 });
 
-Then('I should see sale prices', async function() {
-  const salePrices = await this.page.$$('div.promo-banner .sale-price');
-  if (salePrices.length === 0) throw new Error('No sale prices found');
+Then('the hero call to action button should be clickable', async () => {
+  await expect(homepage.heroCTA).toBeEnabled();
 });
 
-// ===== Scrolling =====
-When('I scroll down {int}', async function(pixels) {
-  await homePage.scrollDown(pixels);
+Then('the {string} section should be visible', async (sectionName) => {
+  await expect(homepage.getSectionByTitle(sectionName)).toBeVisible();
 });
 
-Then('I should see elements that appear after scrolling', async function() {
-  const el = await this.page.$('div.scroll-element'); // update selector if needed
-  if (!el) throw new Error('No elements found after scrolling');
+Then('each trend category should have an image and label', async () => {
+  const items = await homepage.trendItems;
+  expect(items.length).toBeGreaterThan(0);
+
+  for (const item of items) {
+    await expect(item.locator('img')).toBeVisible();
+    await expect(item.locator('text=*')).toBeVisible();
+  }
 });
 
-When('I scroll up {int}', async function(pixels) {
-  await homePage.scrollUp(pixels);
+Then('the popular categories carousel should be displayed', async () => {
+  await expect(homepage.popularCategoriesCarousel).toBeVisible();
 });
 
-Then('I should return to the top of the page', async function() {
-  const scrollY = await this.page.evaluate(() => window.scrollY);
-  if (scrollY !== 0) throw new Error('Did not return to top of the page');
+Then('product cards should be displayed', async () => {
+  const cards = await homepage.productCards;
+  expect(cards.length).toBeGreaterThan(0);
+});
+
+Then(
+  'each product card should show:',
+  async (dataTable) => {
+    for (const card of await homepage.productCards) {
+      await expect(card.locator('img')).toBeVisible();
+      await expect(card.locator('.product-name')).toBeVisible();
+      await expect(card.locator('.product-price')).toBeVisible();
+      await expect(card.locator('button')).toBeVisible();
+    }
+  }
+);
+
+Then('the footer should be visible', async () => {
+  await expect(homepage.footer).toBeVisible();
 });

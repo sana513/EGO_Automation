@@ -1,22 +1,51 @@
-const {expect} = require("@playwright/test");
-const {Given, When, Then} = require("@cucumber/cucumber");
-const AddToCartPage = require("../../pages/AddToCartPgae");
+const { Given, When, Then } = require('@cucumber/cucumber');
+const AddToCartPage = require('../../pages/AddToCartPgae');
 
-let addToCartPage = new AddToCartPage(this.page);
+let addToCart;
 
-Given("the user is on the product detail page", async function () {
-    addToCartPage = new AddToCartPage(this.page);
-    await addToCartPage.navigateToProductDetailPage();
+Given('I open the website for {string}', async function (region) {
+  addToCart = new AddToCartPage(this.page);
+
+  let url;
+  switch (region.toLowerCase()) {
+    case 'us': url = 'https://vsfstage.egoshoes.com/us/'; break;
+    case 'uk': url = 'https://vsfstage.egoshoes.com/uk/'; break;
+    default: throw new Error(`Unknown region: ${region}`);
+  }
+
+  await addToCart.navigate(url);
 });
-When("the user clicks on the \"Select a Size\" button", async function () {
-    await addToCartPage.clickSelectSizeButton();
+
+Given('I open a random product from PLP', async function () {
+  await addToCart.openRandomProduct();
 });
-When("the user selects a size from the available options", async function () {
-    await addToCartPage.selectSize();
+
+When('I select any available size', async function () {
+  await addToCart.pdp.selectAnyAvailableSize();
 });
-When("the user clicks on the \"Add to Bag\" button", async function () {
-    await addToCartPage.clickAddToBagButton();
+
+When('I add the product to the bag', async function () {
+  await addToCart.pdp.addToBag();
 });
-Then("the product should be added to the shopping cart", async function () {
-    await addToCartPage.verifyProductAddedToCart();
+
+Then('I open the cart page', async function () {
+  await addToCart.openCart();
+});
+When('I update the quantity randomly', async function () {
+  await addToCart.updateQuantityRandomly();
+});
+
+When('I update the product size randomly', async function () {
+  await addToCart.updateSizeRandomly();
+}); 
+When('I add the product to wishlist', async function () {
+  await addToCart.addProductToWishlist();
+});
+
+When('I apply the coupon code {string}', async function (code) {
+  await addToCart.applyCoupon(code);
+});
+
+When('I proceed to checkout', async function () {
+  await addToCart.proceedToCheckout();
 });
