@@ -1,13 +1,14 @@
 module.exports = {
-  
+
   default: {
     require: [
-      "features/step-definitions/*.js",
-      "features/support/*.js"
+      "features/step-definitions/**/*.js",
+      "features/support/world.js",
+      "features/support/hooks.js"
     ],
     publishQuiet: true,
     format: ["progress"],
 
-     
+
   }
 };

@@ -27,9 +27,9 @@ BeforeAll(async function () {
 
 AfterAll(async function () {
   // Close browser once after all scenarios
-  // await page?.close();
-  // await context?.close();
-  // await browser?.close();
+  await page?.close();
+  await context?.close();
+  await browser?.close();
 });
 
 Before(function () {

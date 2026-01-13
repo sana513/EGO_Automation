@@ -46,24 +46,61 @@ const SignupLocators = {
   }
 };
 
+// const HomePageLocators = {
+//   LOGO: '[data-testid="logo"]',
+//   SEARCH_BAR: 'input[data-testid="input-field"][aria-label="Search"]:visible',
+//   USER_ICON: 'svg[id="Acount icon"]',
+//   CART_ICON: 'svg[id="Bag icon"]',
+//   STORE_SWITCHER: 'button[class*="store"], button:has-text("USD")',
+//   NAV_CATEGORY: (name) => `nav >> text="${name}"`,
+//   WHATS_HOT_SECTION: '#whats-hot-section',
+//   PRODUCT_CARD: '.product-card',
+//   PRODUCT_NAME: '.product-card .product-name',
+//   PRODUCT_PRICE: '.product-card .product-price',
+//   ADD_BUTTON: '.product-card button:has-text("Add")',
+
+//   // Dynamic selectors
+//   getCategoryLink: (text) => `a[data-v-497370f6]:has-text("${text}")`,
+//   getProductByIndex: (index) => `[class*="product-card"]:nth(${index})`,
+//   getProductByName: (name) => `:has-text("${name}")`,
+// };
+
 const HomePageLocators = {
   LOGO: '[data-testid="logo"]',
-  SEARCH_BAR: 'input[data-testid="input-field"][aria-label="Search"]:visible',
-  USER_ICON: 'svg[id="Acount icon"]',
-  CART_ICON: 'svg[id="Bag icon"]',
-  STORE_SWITCHER: 'button[class*="store"], button:has-text("USD")',
-  NAV_CATEGORY: (name) => `nav >> text="${name}"`,
-  WHATS_HOT_SECTION: '#whats-hot-section',
-  PRODUCT_CARD: '.product-card',
-  PRODUCT_NAME: '.product-card .product-name',
-  PRODUCT_PRICE: '.product-card .product-price',
-  ADD_BUTTON: '.product-card button:has-text("Add")',
 
-  // Dynamic selectors
-  getCategoryLink: (text) => `a[data-v-497370f6]:has-text("${text}")`,
-  getProductByIndex: (index) => `[class*="product-card"]:nth(${index})`,
-  getProductByName: (name) => `:has-text("${name}")`,
+  HERO_BANNER: '//*[@id="splide01-slide01"]/div',
+
+  PRODUCT_GRID_MAIN: 'div[title="Shop By Trend"][heading="Shop By Trend"]',
+
+  CATEGORY_CARDS: {
+    CO_ORDS: 'div[title="Shop By Trend"][heading="Shop By Trend"] .item .product-image a[href="/us/c/clothing/co-ords"]',
+    TOPS: 'div[title="Shop By Trend"][heading="Shop By Trend"] .item .product-image a[href="/us/c/clothing/tops"]',
+    DRESSES: 'div[title="Shop By Trend"][heading="Shop By Trend"] .item .product-image a[href="/us/c/clothing/dresses"]',
+    LOUNGEWEAR: 'div[title="Shop By Trend"][heading="Shop By Trend"] .item .product-image a[href="/us/c/clothing/loungewear"]'
+  },
+
+  POPULAR_CATEGORY_HEADING: 'h2:has-text("Popular Categories")',
+
+  WHATS_HOT_HEADING: 'h2:has-text("What\'s Hot!")',
+
+  // Scoped section
+  WHATS_HOT_SECTION: 'section:has(h2:has-text("What\'s Hot!"))',
+
+  // All quick add buttons inside the section
+  WHATS_HOT_ADD_BUTTONS:
+    'button[data-testid="quick-add-button"]',
+
+    SIZE_CONTAINER: 'div.flex.flex-col.h-full.overflow-y-auto',
+
+ SIZE_OPTIONS:
+    'div.flex.flex-col.h-full.overflow-y-auto ul li > button',
+ ADD_TO_BAG_BUTTON: 'button:has-text("Add to Bag")',
+  SIZE_BY_TEXT: (size) =>
+    `div.flex.flex-col.h-full.overflow-y-auto ul li > button:has(span:text("${size}"))`,
 };
+
+
+
 const AddToCartLocators = {
   Update_quantity: '[data-testid="cart-product-card-quantity-select"]',
   Update_size: '[data-testid="cart-product-card-size-select"]',
