@@ -7,15 +7,9 @@ class SignupPage extends BasePage {
     if (!page) throw new Error("Page instance is required to initialize SignupPage");
     this.page = page;
     this.l = locators.signupPage;
-
-    // Register drawer root locator
     this.registerDrawer = () => this.page.locator('[data-testid="register-page"]');
-
-    // Top-level navigation
     this.accountIcon = page.locator(this.l.accountIcon);
     this.signupLink = page.locator(this.l.signupLink);
-
-    // Marketing checkboxes
     this.marketing = {
       email: page.locator(this.l.marketing.email),
       text: page.locator(this.l.marketing.text),
@@ -24,16 +18,12 @@ class SignupPage extends BasePage {
 
     this.errorMessage = page.locator(this.l.errorMessage);
   }
-
-  // Ensure drawer and all fields are ready
   async setActiveForm() {
     if (!this.page) throw new Error("Page is not initialized");
 
     const drawer = this.registerDrawer();
     await drawer.waitFor({ state: "visible", timeout: 30000 });
     this.activeForm = drawer;
-
-    // Scoped locators
     this.firstNameInput = this.activeForm.locator(this.l.firstName);
     this.lastNameInput = this.activeForm.locator(this.l.lastName);
     this.passwordInput = this.activeForm.locator(this.l.password);
@@ -53,18 +43,12 @@ class SignupPage extends BasePage {
       year: this.activeForm.locator('select[data-testid="select-input"]').nth(2),
     };
   }
-
-  // Navigate to Signup Page
   async navigateToSignup() {
     if (!this.page) throw new Error("Page is not initialized");
-
-    // Clear previous session
     await this.page.context().clearCookies();
     await this.page.evaluate(() => localStorage.clear());
 
-    await this.navigate("https://vsfstage.egoshoes.com/us");
-
-    // Wait for navigation elements
+    await this.navigate(this.getBaseUrl('us'));
     await this.accountIcon.waitFor({ state: "visible", timeout: 15000 });
     await this.accountIcon.click();
 
@@ -74,8 +58,6 @@ class SignupPage extends BasePage {
     await this.page.waitForSelector('[data-testid="register-page"]', { timeout: 30000 });
     await this.setActiveForm();
   }
-
-  // Enter initial email
   async enterInitialEmail(email) {
     if (!this.activeForm) await this.setActiveForm();
 
@@ -113,17 +95,13 @@ class SignupPage extends BasePage {
     if (details["Password"]) await this.passwordInput.fill(details["Password"]);
     if (details["Confirm Password"]) await this.confirmPasswordInput.fill(details["Confirm Password"]);
   }
-
-  // Safe DOB selection
   async setDOB() {
     if (!this.activeForm) await this.setActiveForm();
 
     const day = (Math.floor(Math.random() * 28) + 1).toString();
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const month = months[Math.floor(Math.random() * months.length)];
-    const year = (Math.floor(Math.random() * (2000-1950+1))+1950).toString();
-
-    // Wait & select with retries
+    const year = (Math.floor(Math.random() * (2000 - 1950 + 1)) + 1950).toString();
     await this.dob.day.waitFor({ state: "visible", timeout: 15000 });
     await this.dob.day.selectOption(day);
 

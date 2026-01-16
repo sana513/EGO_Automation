@@ -55,8 +55,8 @@ Feature: Full E-commerce End-to-End Flow
 
     # User action: Add a product from What's Hot
     When I click any random Add CTA from What's Hot section
-    And I select any available size
-    Then I add the product to the bag
+    And I select any available size from the quick-add modal
+    Then I add the product to the bag from the homepage section
 
   # ===== PLP =====
  @plp @e2e
@@ -77,11 +77,14 @@ Scenario: Open specific product by index
   When I open product number 3
   Then I should be on the PDP page
 
+@plp @sequential
+Scenario: Verify multiple categories sequentially
+  Given I navigate through all subcategories sequentially and verify PLP visibility
+
 
   # ===== PDP / ADD TO CART =====
   @pdp 
 Scenario: Add a random product to the cart
-  Given I open the website for "us"
   And I open a random product from PLP
   When I select any available size
   And I add the product to the bag
@@ -89,7 +92,6 @@ Scenario: Add a random product to the cart
  # ===== ADD TO CART =====
 @addtocart @e2e
 Scenario: Update cart and proceed to checkout
-  Given I open the website for "us"
   And I open a random product from PLP
   When I select any available size
   And I add the product to the bag
@@ -102,13 +104,18 @@ Scenario: Update cart and proceed to checkout
 
   # ===== CHECKOUT =====
   @checkout @e2e
-  Scenario: Successful checkout with valid details
-    Given the user has added a product to the cart
-    And navigates to the checkout page
-    When the user enters a valid email
-    And continues to shipping
-    And fills in shipping details
-    And selects payment method "card"
-    And enters valid card details
-    And clicks on Pay Now
+  Scenario: Complete checkout flow from product selection to order placement
+    # Add product to cart
+    Given I open a random product from PLP
+    When I select any available size
+    And I add the product to the bag
+    Then I open the cart page
+    And I proceed to checkout
+    
+    # Complete checkout process
+    When I enter email "sana.zafar@rltsquare.com" for checkout
+    And I continue to shipping
+    And I fill in shipping details
+    And I enter valid card details
+    And I click on Pay Now
     Then the order should be placed successfully

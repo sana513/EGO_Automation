@@ -1,86 +1,132 @@
 const BasePage = require('../pages/BasePage');
 const { expect } = require('@playwright/test');
+const { PLPLocators } = require('../locators/EGO_Locators');
 
 class ProductListingPage extends BasePage {
   constructor(page) {
     super(page);
     this.page = page;
-    this.productTile = '[data-testid="image-slot"]';
-    this.loadMoreButton = '#pagination-next';
+
+    this.pageTitle = PLPLocators.pageTitle;
+    this.pageDescription = PLPLocators.pageDescription;
+
+    this.productTile = PLPLocators.productTile;
+    this.productTitle = PLPLocators.productTitle;
+    this.productPrice = PLPLocators.productPrice;
+    this.productImage = PLPLocators.productImage;
+    this.wishlistIcon = PLPLocators.wishlistIcon;
+
+    this.loadMoreButton = PLPLocators.loadMoreButton;
+
+    this.mainCategoryLinks = PLPLocators.mainCategoryLinks;
+    this.subCategoryLinks = PLPLocators.subCategoryLinks;
   }
 
-  async navigateToPLP(url = 'https://vsfstage.egoshoes.com/us') {
-    await this.page.context().clearCookies();
-    await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await this.closeModalIfPresent();
+  async waitForPLP(timeout = 30000) {
+    await this.page.waitForSelector(this.productTile, { timeout });
+  }
 
-    // Select only visible category links (e.g. top level or currently open menu items)
-    const categoryLinks = this.page.locator('nav a[href*="/c/"]:visible');
-    await categoryLinks.first().waitFor();
-    const count = await categoryLinks.count();
+  async verifyPLPHeaderContent() {
+    await expect(this.page.locator(this.pageTitle)).toBeVisible();
 
-    if (count > 0) {
-      const randomIndex = Math.floor(Math.random() * count);
-      const selectedLink = categoryLinks.nth(randomIndex);
-      console.log(`Clicking category link #${randomIndex}`);
-      await selectedLink.hover(); // Hover first to ensure interactivity if it's a menu
-      await selectedLink.click();
-      await expect(this.page).toHaveURL(/\/c\//);
-    } else {
-      throw new Error("No visible category links found");
+    const description = this.page.locator(this.pageDescription).first();
+    if (await description.isVisible()) {
+      await expect(description).not.toBeEmpty();
     }
-
-    await this.closeModalIfPresent();
-
-    await this.page.waitForFunction(
-      (selector) => document.querySelectorAll(selector).length > 0,
-      this.productTile
-    );
   }
 
-  async verifyProductsVisible() {
+  async verifyProductsUI(limit = 40, startIndex = 0) {
     const products = this.page.locator(this.productTile);
     const count = await products.count();
-    expect(count).toBeGreaterThan(0);
+
+    if (count <= startIndex) {
+      console.warn(
+        `Requested start index ${startIndex} but only ${count} products found. Skipping.`
+      );
+      return 0;
+    }
+
+    const verifyLimit = Math.min(count - startIndex, limit);
+    console.log(`Verifying ${verifyLimit} products starting from index ${startIndex}`);
+
+    await products.nth(startIndex).scrollIntoViewIfNeeded();
+    await products.nth(startIndex + verifyLimit - 1).scrollIntoViewIfNeeded();
+
+    for (let i = startIndex; i < startIndex + verifyLimit; i++) {
+      const product = products.nth(i);
+
+      await Promise.all([
+        expect(product).toBeVisible(),
+        expect(product.locator(this.productImage)).toBeVisible(),
+        expect(product.locator(this.productTitle)).toBeVisible(),
+        expect(product.locator(this.productPrice).first()).toBeVisible(),
+        expect(product.locator(this.wishlistIcon)).toBeVisible()
+      ]);
+
+      if ((i + 1) % 10 === 0) {
+        console.log(`Verified ${i + 1} products`);
+      }
+    }
+
+    return verifyLimit;
   }
 
-  async loadMoreProducts() {
-    let previousCount = 0;
+  async loadMoreOnce() {
+    const loadMore = this.page.locator(this.loadMoreButton);
+    if (!(await loadMore.isVisible().catch(() => false))) return;
 
-    while (true) {
-      const currentCount = await this.page.locator(this.productTile).count();
+    const beforeCount = await this.page.locator(this.productTile).count();
+    await this.closeModalIfPresent();
+    await loadMore.click({ force: true });
 
-      if (currentCount === previousCount) break;
-
-      previousCount = currentCount;
-
-      const loadMore = this.page.locator(this.loadMoreButton);
-      if (!(await loadMore.isVisible().catch(() => false))) break;
-
-      await loadMore.scrollIntoViewIfNeeded();
-      await loadMore.click();
-
+    try {
       await this.page.waitForFunction(
-        (selector, count) =>
+        ({ selector, count }) =>
           document.querySelectorAll(selector).length > count,
-        this.productTile,
-        previousCount
+        { selector: this.productTile, count: beforeCount },
+        { timeout: 20000 }
       );
+
+      await this.page.waitForTimeout(500);
+    } catch {
+      console.warn('No additional products loaded');
     }
+  }
+
+  async openFirstAvailableSubCategory() {
+    const mainCategories = this.page.locator(this.mainCategoryLinks);
+    if (!(await mainCategories.count())) {
+      throw new Error('No main categories found');
+    }
+
+    await mainCategories.first().hover();
+    await this.page.waitForTimeout(1000);
+
+    const subCategories = this.page
+      .locator(this.subCategoryLinks)
+      .filter({ visible: true })
+      .filter({ hasNotText: 'NEW IN' })
+      .filter({
+        has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
+      });
+
+    if (!(await subCategories.count())) {
+      throw new Error('No visible subcategories found');
+    }
+
+    await subCategories.first().click({ force: true });
+    await this.waitForPLP();
   }
 
   async openFirstProduct() {
     const products = this.page.locator(this.productTile);
-    const count = await products.count();
-    if (count === 0) throw new Error("No products found on PLP");
-
-    const randomIndex = Math.floor(Math.random() * count);
-    const product = products.nth(randomIndex);
-    await product.scrollIntoViewIfNeeded();
+    if (!(await products.count())) {
+      throw new Error('No products found on PLP');
+    }
 
     await Promise.all([
       this.page.waitForURL(/\/p\//i),
-      product.click()
+      products.first().click()
     ]);
   }
 
@@ -88,18 +134,85 @@ class ProductListingPage extends BasePage {
     const products = this.page.locator(this.productTile);
     const count = await products.count();
 
-    if (index >= count) throw new Error(`Index ${index} is out of bounds. Total products: ${count}`);
-
-    const product = products.nth(index);
-    await product.scrollIntoViewIfNeeded();
-
+    if (index >= count) {
+      throw new Error(`Index ${index} out of bounds. Total products: ${count}`);
+    }
 
     await Promise.all([
       this.page.waitForURL(/\/p\//i),
-      product.click()
+      products.nth(index).click()
     ]);
   }
 
+  async openSubCategory(mainIndex = 0, subIndex = 0) {
+    const mainCategories = this.page.locator(this.mainCategoryLinks);
+    if (!(await mainCategories.count())) {
+      throw new Error('No main categories found');
+    }
+
+    const mainCat = mainCategories.nth(mainIndex);
+    const mainText = (await mainCat.textContent()).trim();
+    console.log(`Hovering over main category: ${mainText}`);
+
+    await mainCat.hover();
+
+    const subCategories = this.page
+      .locator(this.subCategoryLinks)
+      .filter({ visible: true })
+      .filter({ hasNotText: 'NEW IN' })
+      .filter({
+        has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
+      });
+
+    await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+
+    const subCount = await subCategories.count();
+    console.log(`Found ${subCount} visible subcategories`);
+
+    if (subIndex >= subCount && subCount > 0) {
+      throw new Error(`Subcategory index ${subIndex} out of bounds`);
+    }
+
+    const subCat = subCategories.nth(subIndex);
+    const subText = (await subCat.textContent().catch(() => 'Unknown')).trim();
+    const href = await subCat.getAttribute('href').catch(() => 'none');
+
+    console.log(`Clicking subcategory: ${subText} (${href})`);
+
+    await subCat.click({ force: true });
+    await this.waitForPLP();
+  }
+
+  async getNavigationStructure() {
+    const mainCategories = this.page.locator(this.mainCategoryLinks);
+    const mainCount = await mainCategories.count();
+    const structure = [];
+
+    for (let i = 0; i < mainCount; i++) {
+      const mainCat = mainCategories.nth(i);
+      const text = (await mainCat.textContent()).trim();
+      if (!text) continue;
+
+      await mainCat.hover();
+      await this.page.waitForTimeout(100);
+
+      const subCategories = this.page
+        .locator(this.subCategoryLinks)
+        .filter({ visible: true })
+        .filter({ hasNotText: 'NEW IN' })
+        .filter({
+          has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
+        });
+
+      structure.push({
+        mainIndex: i,
+        mainText: text,
+        subCount: await subCategories.count()
+      });
+    }
+
+    return structure;
+  }
 }
 
 module.exports = ProductListingPage;

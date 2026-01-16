@@ -24,49 +24,32 @@ class ProductDetailPage extends BasePage {
     // PLP → PDP (dynamic)
 
     async openRandomProductFromPLP() {
-
         const plp = new ProductListingPage(this.page);
-
-        await plp.navigateToPLP();
-
-        await plp.loadMoreProducts();
-
+        await plp.openFirstAvailableSubCategory();
+        await plp.loadMoreOnce();
         await plp.openFirstProduct();
-
     }
 
     async selectAnyAvailableSize() {
         console.log("🔹 Starting size selection...");
-
-        // 1️⃣ Click "Select a Size" dropdown
         const sizeSelectorButton = this.page.locator(this.sizeSelectorButton).first();
         await sizeSelectorButton.waitFor({ state: 'visible', timeout: 10000 });
         await sizeSelectorButton.click();
         console.log("Clicked 'Select a Size' button");
-
-        // 2️⃣ Get all size list items (not spans, to check parent element properly)
         const sizeListItems = this.page.locator('ul.select-options li');
         await sizeListItems.first().waitFor({ state: 'visible', timeout: 10000 });
-
-        // 3️⃣ Filter out items with "Notify Me" and collect available sizes
         const count = await sizeListItems.count();
         const availableSizes = [];
-        
+
         for (let i = 0; i < count; i++) {
             const listItem = sizeListItems.nth(i);
-            // Get the full text content of the list item to check for "Notify Me"
             const itemText = await listItem.textContent();
-            // Check if this list item contains "Notify Me" text
             const hasNotifyMe = itemText && itemText.includes('Notify Me');
-            // Get the first span (which contains the size text like "US 02 (S)")
             const sizeSpan = listItem.locator('span').first();
             const sizeText = await sizeSpan.textContent();
-            
-            // Exclude items with "Notify Me", disabled items, or empty size text
             const disabled = await sizeSpan.getAttribute('disabled');
-            
+
             if (!hasNotifyMe && !disabled && sizeText && sizeText.trim() !== '') {
-                // Store the first span (size selector) for clicking
                 availableSizes.push(sizeSpan);
                 console.log(`✅ Found available size: ${sizeText.trim()}`);
             } else {
@@ -78,11 +61,10 @@ class ProductDetailPage extends BasePage {
             throw new Error('No available size found (all sizes are "Notify Me" or disabled)');
         }
 
-        // 4️⃣ Pick a random available size and click it
         const randomIndex = Math.floor(Math.random() * availableSizes.length);
         const randomSize = availableSizes[randomIndex];
         const selectedSizeText = await randomSize.textContent();
-        
+
         console.log(`🎯 Selecting random size: ${selectedSizeText.trim()}`);
         await randomSize.scrollIntoViewIfNeeded();
         await randomSize.click();
@@ -101,13 +83,20 @@ class ProductDetailPage extends BasePage {
     }
 
     async openCart() {
+        await this.closeModalIfPresent();
+        await this.page.waitForTimeout(500);
 
         const cart = this.page.locator(this.cartIcon);
-
         await cart.waitFor({ state: 'visible', timeout: 10000 });
+        try {
+            await cart.click({ timeout: 5000 });
+        } catch (error) {
+            console.log('Cart click blocked, trying with force...');
+            await this.closeModalIfPresent();
+            await cart.click({ force: true });
+        }
 
-        await cart.click();
-
+        await this.page.waitForTimeout(1000);
     }
 
 }

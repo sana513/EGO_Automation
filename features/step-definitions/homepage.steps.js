@@ -6,6 +6,11 @@ Given("I open the homepage for {string}", async function (country) {
   await this.homePage.open(country);
 });
 
+Then("I verify all homepage elements", async function () {
+  this.homePage = new HomePage(this.page);
+  await this.homePage.verifyAllHomepageElements();
+});
+
 Then("I should see the hero banner", async function () {
   await this.homePage.verifyHeroBanner();
 });
@@ -42,10 +47,10 @@ When("I click any random Add CTA from What's Hot section", async function () {
   await this.homePage.clickRandomAddFromWhatsHot();
 });
 
-When("I select any available size", async function () {
+When("I select any available size from the quick-add modal", async function () {
   await this.homePage.selectAnySize();
 });
 
-Then("I add the product to the bag", async function () {
+Then("I add the product to the bag from the homepage section", async function () {
   await this.homePage.addToBag();
 });

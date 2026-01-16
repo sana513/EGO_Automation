@@ -1,13 +1,9 @@
-const { Given, When, Then } = require("@cucumber/cucumber");
+const { When, Then } = require("@cucumber/cucumber");
 const { expect } = require("chai");
 const LoginPage = require("../../pages/LoginPage");
 
-Given("I open the website for {string}", async function (locale) {
-  this.loginPage = new LoginPage(this.page);
-  await this.loginPage.navigateToLocale(locale);
-});
-
 When("I perform login with valid credentials", async function () {
+  this.loginPage = new LoginPage(this.page);
   await this.loginPage.openLoginModal();
   await this.loginPage.performLogin();
 });

@@ -1,21 +1,16 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const CheckoutPage = require('../../pages/checkoutPage');
 
-Given('the user is on the checkout page', async function () {
+When('I enter email {string} for checkout', async function (email) {
     this.checkoutPage = new CheckoutPage(this.page);
-    await this.checkoutPage.navigateToCheckoutPage();
-    await this.checkoutPage.verifyCheckoutPage();
+    await this.checkoutPage.enterEmail(email);
 });
 
-When('the user enters a valid email', async function () {
-    await this.checkoutPage.enterEmail('sana.zafar@rltsquare.com');
-});
-
-When('continues to shipping', async function () {
+When('I continue to shipping', async function () {
     await this.checkoutPage.clickContinue();
 });
 
-When('fills in shipping details', async function () {
+When('I fill in shipping details', async function () {
     await this.checkoutPage.fillShippingAddress({
         firstName: 'John',
         lastName: 'Doe',
@@ -29,7 +24,7 @@ When('fills in shipping details', async function () {
     });
 });
 
-When('enters valid card details', async function () {
+When('I enter valid card details', async function () {
     await this.checkoutPage.fillCardDetails({
         number: '4242424242424242',
         expiry: '12/30',
@@ -38,7 +33,7 @@ When('enters valid card details', async function () {
     });
 });
 
-When('clicks on Pay Now', async function () {
+When('I click on Pay Now', async function () {
     await this.checkoutPage.clickPayNow();
 });
 

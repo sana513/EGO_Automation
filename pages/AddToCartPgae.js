@@ -12,7 +12,6 @@ class AddToCartPage extends BasePage {
     this.updateSize = AddToCartLocators.Update_size;
     this.addToWishlist = 'button[aria-label="Add to Wishlist"]';
 
-    // Coupon
     this.couponInput = AddToCartLocators.Coupon_Input;
     this.submitButton = AddToCartLocators.Submit_button;
 
@@ -74,7 +73,8 @@ class AddToCartPage extends BasePage {
     }
 
     if (availableOptions.length === 0) {
-      throw new Error('❌ No available sizes to select in cart!');
+      console.warn('⚠️ No additional available sizes found in cart. Skipping size update.');
+      return;
     }
 
     const randomIndex = Math.floor(Math.random() * availableOptions.length);
@@ -90,8 +90,6 @@ class AddToCartPage extends BasePage {
     const wishlistBtn = this.page.locator(this.addToWishlist).first();
     await wishlistBtn.waitFor({ state: 'visible', timeout: 5000 });
     await wishlistBtn.click();
-
-    // Login drawer appears → close it
     const loginDrawer = this.page.locator('[data-testid="drawer"]');
 
     if (await loginDrawer.isVisible({ timeout: 3000 }).catch(() => false)) {

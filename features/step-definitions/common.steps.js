@@ -1,12 +1,11 @@
 const { Given, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
 
+const BasePage = require('../../pages/BasePage');
+
 Given('I open the website for {string}', async function (country) {
-  const urlMap = {
-    us: 'https://vsfstage.egoshoes.com/us',
-    uk: 'https://vsfstage.ego.co.uk',
-  };
-  await this.page.goto(urlMap[country]);
+  this.basePage = new BasePage(this.page);
+  await this.basePage.navigate(this.basePage.getBaseUrl(country));
 });
 
 Then('I should be successfully registered', async function () {

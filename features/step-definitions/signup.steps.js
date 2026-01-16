@@ -6,13 +6,12 @@ let signup;
 
 Given("I navigate to the registration page", async function () {
   signup = new SignupPage(this.page);
-  await signup.navigateToSignup();  // ensures drawer and fields are ready
+  await signup.navigateToSignup(); 
 });
 
 When("I enter a unique email for registration", async function () {
-  // generate and store in world/context
   this.email = generateEmail();
-  console.log("Generated email:", this.email); // debug
+  console.log("Generated email:", this.email); 
   await signup.enterInitialEmail(this.email);
   if (!signup.activeForm) await signup.setActiveForm();
 });
@@ -84,33 +83,3 @@ When("I opt out of all marketing communications", async function () {
 When("I submit the registration form", async function () {
   await signup.submitForm();
 });
-
-// When("I fill password with {string}", async function (password) {
-//   if (!signup.activeForm) await signup.setActiveForm();
-//   await signup.passwordInput.fill(password);
-// });
-
-// When("I fill confirm password with {string}", async function (password) {
-//   if (!signup.activeForm) await signup.setActiveForm();
-//   await signup.confirmPasswordInput.fill(password);
-// });
-
-// Then("I should be successfully registered", async function () {
-//   const registered = await signup.isRegistered();
-//   if (!registered) throw new Error("Registration not successful");
-// });
-
-// Then("I should be redirected to my account", async function () {
-//   const url = signup.page.url();
-//   if (!url.includes("my-account")) throw new Error("Not redirected to account page");
-// });
-
-// Then("I should see {string}", async function (msg) {
-//   const errorText = await signup.getErrorMessage();
-//   if (!errorText.includes(msg)) throw new Error(`Expected error: "${msg}", got "${errorText}"`);
-// });
-
-// Then("My registration should be complete", async function () {
-//   const registered = await signup.isRegistered();
-//   if (!registered) throw new Error("Registration not complete");
-// });
