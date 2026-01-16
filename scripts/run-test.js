@@ -29,7 +29,7 @@ console.log(`   Headless:    ${headless}`);
 console.log(`   Feature:     ${featureFile}`);
 console.log(`   Tags:        ${tags || 'none'}\n`);
 
-let command = `ENV=${env} LOCALE=${locale} HEADLESS=${headless} npx cucumber-js ${featureFile} --require "features/step-definitions/*.js" --require features/support/world.js --require features/support/hooks.js`;
+let command = `npx cross-env ENV=${env} LOCALE=${locale} HEADLESS=${headless} npx cucumber-js ${featureFile} --require "features/step-definitions/*.js" --require features/support/world.js --require features/support/hooks.js`;
 
 if (tags) {
     command += ` --tags ${tags}`;
