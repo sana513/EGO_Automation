@@ -7,12 +7,15 @@ class HomePage extends BasePage {
     super(page);
   }
 
-  async open(country = "us") {
+  async open(country = null) {
+    // If no country specified, use global config
     await this.navigate(this.getBaseUrl(country));
   }
 
   async verifyAllHomepageElements() {
-    await this.open("us");
+    // Use global config if set, otherwise default to "us"
+    const useGlobalConfig = process.env.ENV || process.env.LOCALE;
+    await this.open(useGlobalConfig ? null : "us");
     await this.page.waitForLoadState("domcontentloaded");
     await this.closeModalIfPresent();
 

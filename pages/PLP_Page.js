@@ -95,27 +95,42 @@ class ProductListingPage extends BasePage {
 
   async openFirstAvailableSubCategory() {
     const mainCategories = this.page.locator(this.mainCategoryLinks);
-    if (!(await mainCategories.count())) {
+    const mainCount = await mainCategories.count();
+
+    if (mainCount === 0) {
       throw new Error('No main categories found');
     }
 
-    await mainCategories.first().hover();
-    await this.page.waitForTimeout(1000);
+    // Iterate through main categories to find one with subcategories
+    for (let i = 0; i < mainCount; i++) {
+      // Skip "New In" or empty categories if needed, or just try them all
+      const mainCat = mainCategories.nth(i);
+      const catText = await mainCat.textContent().catch(() => '');
 
-    const subCategories = this.page
-      .locator(this.subCategoryLinks)
-      .filter({ visible: true })
-      .filter({ hasNotText: 'NEW IN' })
-      .filter({
-        has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
-      });
+      console.log(`Checking category ${i}: ${catText}`);
 
-    if (!(await subCategories.count())) {
-      throw new Error('No visible subcategories found');
+      await this.closeModalIfPresent();
+      await mainCat.hover();
+      await this.page.waitForTimeout(1000);
+
+      const subCategories = this.page
+        .locator(this.subCategoryLinks)
+        .filter({ visible: true })
+        .filter({ hasNotText: 'NEW IN' })
+        .filter({
+          has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
+        });
+
+      const subCount = await subCategories.count();
+      if (subCount > 0) {
+        console.log(`Found ${subCount} subcategories in "${catText}"`);
+        await subCategories.first().click({ force: true });
+        await this.waitForPLP();
+        return; // Success
+      }
     }
 
-    await subCategories.first().click({ force: true });
-    await this.waitForPLP();
+    throw new Error('No visible subcategories found in any main category');
   }
 
   async openFirstProduct() {
@@ -164,7 +179,7 @@ class ProductListingPage extends BasePage {
         has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
       });
 
-    await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => { });
 
     const subCount = await subCategories.count();
     console.log(`Found ${subCount} visible subcategories`);

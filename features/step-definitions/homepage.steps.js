@@ -3,7 +3,15 @@ const HomePage = require("../../pages/homepagePage");
 
 Given("I open the homepage for {string}", async function (country) {
   this.homePage = new HomePage(this.page);
-  await this.homePage.open(country);
+
+  // If global ENV or LOCALE is set via command line, use global config
+  const useGlobalConfig = process.env.ENV || process.env.LOCALE;
+
+  if (useGlobalConfig) {
+    await this.homePage.open(); // Uses global locale
+  } else {
+    await this.homePage.open(country); // Uses locale from feature file
+  }
 });
 
 Then("I verify all homepage elements", async function () {

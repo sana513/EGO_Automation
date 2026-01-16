@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "test:e2e": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @e2e",
-    "test:login": "cross-env HEADLESS=false cucumber-js features/Login_Feature.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @login",
-    "test:registration": "cross-env HEADLESS=false cucumber-js features/Signup_Feature.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @registration",
-    "test:homepage": "cross-env HEADLESS=true cucumber-js features/EGO_Features.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @homepage",
-    "test:plp": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @plp",
-    "test:pdp": "cross-env HEADLESS=false cucumber-js features/PDP_Feature.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @pdp",
-    "test:addtocart": "cross-env HEADLESS=false cucumber-js features/AddToCart_Feature.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @addtocart",
-    "test:checkout": "cross-env HEADLESS=false cucumber-js features/Checkout_Feature.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @checkout",
-    "test:sequential": "cross-env HEADLESS=false cucumber-js features/EGO_Features.feature --require \"features/step-definitions/*.js\" --require features/support/world.js --require features/support/hooks.js --tags @sequential"
+    "test:e2e": "node scripts/run-test.js --feature=features/EGO_Features.feature --tags=@e2e --headless=false",
+    "test:login": "node scripts/run-test.js --feature=features/Login_Feature.feature --tags=@login --headless=false",
+    "test:registration": "node scripts/run-test.js --feature=features/Signup_Feature.feature --tags=@registration --headless=false",
+    "test:homepage": "node scripts/run-test.js --feature=features/EGO_Features.feature --tags=@homepage --headless=true",
+    "test:plp": "node scripts/run-test.js --feature=features/EGO_Features.feature --tags=@plp --headless=false",
+    "test:pdp": "node scripts/run-test.js --feature=features/PDP_Feature.feature --tags=@pdp --headless=false",
+    "test:addtocart": "node scripts/run-test.js --feature=features/AddToCart_Feature.feature --tags=@addtocart --headless=false",
+    "test:checkout": "node scripts/run-test.js --feature=features/Checkout_Feature.feature --tags=@checkout --headless=false"
   },
   "dependencies": {
     "@cucumber/cucumber": "^12.3.0",

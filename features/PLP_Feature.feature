@@ -22,3 +22,7 @@ Scenario: Open specific product by index
   Given I open the PLP page
   When I open product number 3
   Then I should be on the PDP page
+
+@plp 
+Scenario: Verify multiple categories sequentially
+  Given I navigate through all subcategories sequentially and verify PLP visibility

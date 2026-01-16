@@ -1,53 +1,30 @@
 const { expect } = require('@playwright/test');
-
-const ENV_CONFIG = {
-  dev: {
-    us: 'https://vsfdev.egoshoes.com/us',
-    uk: 'https://vsfdev.ego.co.uk'
-  },
-  stage: {
-    us: 'https://vsfstage.egoshoes.com/us',
-    uk: 'https://vsfstage.ego.co.uk'
-  },
-  prod: {
-    us: 'https://egoshoes.com/us',
-    uk: 'https://ego.co.uk'
-  }
-};
+const { getBaseUrl } = require('../config/config');
+const { CommonLocators } = require('../locators/EGO_Locators');
 
 class BasePage {
   constructor(page) {
     this.page = page;
-
     this.modals = {
-      closeButtons: this.page.locator(
-        'button[aria-label="Close Modal"], ' +
-        'button:has-text("Decline offer"), #button3, ' +
-        'button[aria-label="Close"], .fb_lightbox button.close, [class*="close-button"], ' +
-        '.fb_lightbox-overlay, .preloaded_lightbox [aria-label="Close"]'
-      )
+      closeButtons: this.page.locator(CommonLocators.modals.closeButtons.join(','))
     };
   }
 
-  getBaseUrl(country = 'us') {
-    const env = process.env.ENV || 'stage';
-    const config = ENV_CONFIG[env] || ENV_CONFIG.stage;
-    return config[country] || config.us;
+  getBaseUrl(locale = null) {
+    return getBaseUrl(null, locale);
   }
 
   async navigate(url) {
     const targetUrl = url || this.getBaseUrl();
-    await this.page.goto(targetUrl, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000
-    });
+    await this.page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await this.page.waitForTimeout(500);
     await this.closeModalIfPresent();
   }
 
   async closeModalIfPresent() {
-    const count = await this.modals.closeButtons.count();
+    await this.handleCookieConsent();
 
+    const count = await this.modals.closeButtons.count();
     for (let i = 0; i < count; i++) {
       const button = this.modals.closeButtons.nth(i);
       if (await button.isVisible().catch(() => false)) {
@@ -56,22 +33,34 @@ class BasePage {
       }
     }
 
-    await this.page.evaluate(() => {
-      const selectors = [
-        '[id*="lightbox"]',
-        '[class*="lightbox"]',
-        '[class*="overlay-fixed"]',
-        '[id*="sidebar-overlay"]',
-        '.fb_lightbox',
-        '.fb_lightbox-overlay'
-      ];
-
-      selectors.forEach(selector => {
-        document.querySelectorAll(selector).forEach(element => {
-          element.style.display = 'none';
-        });
+    await this.page.evaluate((selectors) => {
+      selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => el.style.display = 'none');
       });
-    }).catch(() => {});
+    }, CommonLocators.modals.overlays).catch(() => {});
+  }
+
+  async handleCookieConsent() {
+    try {
+      for (const selector of CommonLocators.cookieConsent.acceptButtons) {
+        const element = this.page.locator(selector).first();
+        if (await element.isVisible({ timeout: 500 }).catch(() => false)) {
+          await element.click({ force: true }).catch(() => {});
+          await this.page.waitForTimeout(500);
+          break;
+        }
+      }
+
+      await this.page.evaluate((overlays) => {
+        overlays.forEach(sel => {
+          document.querySelectorAll(sel).forEach(el => {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.remove();
+          });
+        });
+      }, CommonLocators.cookieConsent.overlays).catch(() => {});
+    } catch {}
   }
 
   async click(selector) {
