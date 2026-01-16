@@ -5,8 +5,6 @@ class LoginPage extends BasePage {
   constructor(page) {
     super(page);
     this.page = page;
-
-    // Assign locators
     this.accountIcon = page.locator(locators.accountIcon);
     this.emailInput = page.locator(locators.emailInput);
     this.passwordInput = page.locator(locators.passwordInput);
@@ -23,7 +21,9 @@ class LoginPage extends BasePage {
   }
 
   async navigateToLocale(locale) {
-    await this.navigate(`https://vsfstage.egoshoes.com/${locale}`);
+    const targetUrl = this.getBaseUrl(locale);
+    console.log(`Navigating to dynamic URL: ${targetUrl}`);
+    await this.navigate(targetUrl);
     await this.page.waitForLoadState("domcontentloaded");
     await this.closePopupIfPresent();
   }
@@ -31,7 +31,7 @@ class LoginPage extends BasePage {
   async closePopupIfPresent() {
     for (const popup of Object.values(this.popups)) {
       if (await popup.isVisible().catch(() => false)) {
-        await popup.click().catch(() => {});
+        await popup.click().catch(() => { });
         await this.page.waitForTimeout(500);
         break;
       }
@@ -39,8 +39,9 @@ class LoginPage extends BasePage {
   }
 
   async openLoginModal() {
-    await this.accountIcon.click();
-    await this.emailInput.waitFor({ state: "visible", timeout: 10000 });
+    await this.closeModalIfPresent();
+    await this.accountIcon.first().click({ force: true });
+    await this.emailInput.waitFor({ state: "visible", timeout: 15000 });
   }
 
   async performLogin(email = "naveed.chughtai@rltsquare.com", password = "Rlt@20250101") {

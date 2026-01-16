@@ -1,66 +1,99 @@
 const { expect } = require('@playwright/test');
 
+const ENV_CONFIG = {
+  dev: {
+    us: 'https://vsfdev.egoshoes.com/us',
+    uk: 'https://vsfdev.ego.co.uk'
+  },
+  stage: {
+    us: 'https://vsfstage.egoshoes.com/us',
+    uk: 'https://vsfstage.ego.co.uk'
+  },
+  prod: {
+    us: 'https://egoshoes.com/us',
+    uk: 'https://ego.co.uk'
+  }
+};
+
 class BasePage {
   constructor(page) {
     this.page = page;
 
-    // Global modal locators
     this.modals = {
-      modalRoot: this.page.locator('#layout'),
       closeButtons: this.page.locator(
-        '#layout button[aria-label="Close Modal"], ' +
-        '#layout button:has-text("Decline offer"), #button3'
-      ),
+        'button[aria-label="Close Modal"], ' +
+        'button:has-text("Decline offer"), #button3, ' +
+        'button[aria-label="Close"], .fb_lightbox button.close, [class*="close-button"], ' +
+        '.fb_lightbox-overlay, .preloaded_lightbox [aria-label="Close"]'
+      )
     };
   }
 
-  // Navigate to URL and handle modal if it appears
+  getBaseUrl(country = 'us') {
+    const env = process.env.ENV || 'stage';
+    const config = ENV_CONFIG[env] || ENV_CONFIG.stage;
+    return config[country] || config.us;
+  }
+
   async navigate(url) {
-    await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await this.page.waitForTimeout(500); // brief pause
+    const targetUrl = url || this.getBaseUrl();
+    await this.page.goto(targetUrl, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000
+    });
+    await this.page.waitForTimeout(500);
     await this.closeModalIfPresent();
   }
 
-  // Close first visible modal globally
   async closeModalIfPresent() {
-    if (await this.modals.modalRoot.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const count = await this.modals.closeButtons.count();
-      for (let i = 0; i < count; i++) {
-        const btn = this.modals.closeButtons.nth(i);
-        if (await btn.isVisible().catch(() => false)) {
-          await btn.click({ force: true });
-          await this.modals.modalRoot.waitFor({ state: 'hidden', timeout: 3000 }).catch(() => {});
-          break; // close only one modal at a time
-        }
+    const count = await this.modals.closeButtons.count();
+
+    for (let i = 0; i < count; i++) {
+      const button = this.modals.closeButtons.nth(i);
+      if (await button.isVisible().catch(() => false)) {
+        await button.click({ force: true }).catch(() => {});
+        await this.page.waitForTimeout(500);
       }
     }
+
+    await this.page.evaluate(() => {
+      const selectors = [
+        '[id*="lightbox"]',
+        '[class*="lightbox"]',
+        '[class*="overlay-fixed"]',
+        '[id*="sidebar-overlay"]',
+        '.fb_lightbox',
+        '.fb_lightbox-overlay'
+      ];
+
+      selectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => {
+          element.style.display = 'none';
+        });
+      });
+    }).catch(() => {});
   }
 
-  // Click safely, auto-handles modal
   async click(selector) {
     await this.closeModalIfPresent();
     await this.page.click(selector);
   }
 
-  // Fill input safely, auto-handles modal
   async fill(selector, value) {
     await this.closeModalIfPresent();
     await this.page.fill(selector, value);
   }
 
-  // Get text safely
   async getText(selector) {
     await this.closeModalIfPresent();
-    return await this.page.textContent(selector);
+    return this.page.textContent(selector);
   }
 
-  // Wait for element safely
   async waitForSelector(selector, options = {}) {
     await this.closeModalIfPresent();
-    return await this.page.waitForSelector(selector, options);
+    return this.page.waitForSelector(selector, options);
   }
 
-  // Fill multiple form fields
   async fillForm(fields) {
     for (const selector in fields) {
       if (fields[selector] !== '') {
