@@ -1,41 +1,13 @@
-npx cucumber-js features/EGO_Features.feature \
-  --require features/step-definitions/login.steps.js \
-  --require features/support/world.js \
-  --require features/support/hooks.js \
-  --tags @login      
+git add .
+git commit -m "Describe your change"
+git push origin develop
+Test changes locally before merging to main.
 
-  npx cucumber-js features/EGO_Features.feature \
-  --require features/step-definitions/common.steps.js \
-  --require features/step-definitions/signup.steps.js \
-  --require features/support/world.js \
-  --require features/support/hooks.js \
-  --tags @registration
+Merge to main only when stable:
 
-  npx cucumber-js features/EGO_Features.feature \
-  --require features/step-definitions/common.steps.js \
-  --require features/step-definitions/checkout.steps.js \
-  --require features/support/world.js \
-  --require features/support/hooks.js \
-  --tags @checkout
+bash
 
-
-  npx cucumber-js features/EGO_Features.feature \
-  --require features/step-definitions/common.steps.js \
-  --require features/step-definitions/PLP.steps.js \
-  --require features/support/world.js \
-  --require features/support/hooks.js \
-  --tags @plp
-
-   npx cucumber-js features/EGO_Features.feature \
-  --require features/step-definitions/common.steps.js \
-  --require features/step-definitions/PDP.steps.js \
-  --require features/support/world.js \
-  --require features/support/hooks.js \
-  --tags @pdp
-   npx cucumber-js features/EGO_Features.feature \
-  --require features/step-definitions/common.steps.js \
-  --require features/step-definitions/homepage.steps.js \
-  --require features/support/world.js \
-  --require features/support/hooks.js \
-  --tags @homepage
-
+git checkout main
+git pull origin main
+git merge develop
+git push origin main
