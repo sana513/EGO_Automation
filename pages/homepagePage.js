@@ -1,6 +1,7 @@
 const { expect } = require("@playwright/test");
-const BasePage = require("./BasePage");
-const { HomePageLocators } = require("../locators/EGO_Locators");
+const BasePage = require("./basePage");
+const { HomePageLocators } = require("../locators/homePageLocators");
+const { testData } = require("../config/testData");
 
 class HomePage extends BasePage {
   constructor(page) {
@@ -8,14 +9,12 @@ class HomePage extends BasePage {
   }
 
   async open(country = null) {
-    // If no country specified, use global config
-    await this.navigate(this.getBaseUrl(country));
+    await this.navigate(this.getBaseUrl(country || 'us'));
   }
 
   async verifyAllHomepageElements() {
-    // Use global config if set, otherwise default to "us"
-    const useGlobalConfig = process.env.ENV || process.env.LOCALE;
-    await this.open(useGlobalConfig ? null : "us");
+    const locale = process.env.LOCALE || 'us';
+    await this.open(locale);
     await this.page.waitForLoadState("domcontentloaded");
     await this.closeModalIfPresent();
 
@@ -56,7 +55,7 @@ class HomePage extends BasePage {
     await this.page.mouse.wheel(0, 1200);
     await this.page.waitForTimeout(800);
     await this.closeModalIfPresent();
-    await grid.waitFor({ state: "visible", timeout: 30000 });
+    await grid.waitFor({ state: "visible", timeout: testData.timeouts.extreme });
     await grid.scrollIntoViewIfNeeded();
   }
 
@@ -113,9 +112,9 @@ class HomePage extends BasePage {
   }
 
   async selectAnySize() {
-    const preferredSizes = ["UK 6", "UK 7", "UK 5"];
+    const preferredSizes = testData.homepage.preferredSizes;
     const container = this.page.locator(HomePageLocators.SIZE_CONTAINER);
-    await container.waitFor({ state: "visible", timeout: 20000 });
+    await container.waitFor({ state: "visible", timeout: testData.timeouts.medium });
     await this.closeModalIfPresent();
 
     for (const size of preferredSizes) {
@@ -132,7 +131,7 @@ class HomePage extends BasePage {
 
   async addToBag() {
     const addBtn = this.page.locator(HomePageLocators.ADD_TO_BAG_BUTTON);
-    await addBtn.waitFor({ state: "visible", timeout: 20000 });
+    await addBtn.waitFor({ state: "visible", timeout: testData.timeouts.medium });
     await this.page.waitForFunction(
       el => !el.hasAttribute("disabled"),
       await addBtn.elementHandle()

@@ -22,7 +22,7 @@ for (let i = 0; i < args.length; i++) {
     }
 }
 
-console.log(`\n🚀 Running tests with:`);
+console.log(`\n Running tests with:`);
 console.log(`   Environment: ${env}`);
 console.log(`   Locale:      ${locale}`);
 console.log(`   Headless:    ${headless}`);

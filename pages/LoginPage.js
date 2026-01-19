@@ -1,23 +1,24 @@
-const BasePage = require("./BasePage");
-const locators = require("../locators/EGO_Locators").LoginLocators;
+const BasePage = require("./basePage");
+const { LoginLocators } = require("../locators/loginLocators");
+const { testData } = require("../config/testData");
 
 class LoginPage extends BasePage {
   constructor(page) {
     super(page);
     this.page = page;
-    this.accountIcon = page.locator(locators.accountIcon);
-    this.emailInput = page.locator(locators.emailInput);
-    this.passwordInput = page.locator(locators.passwordInput);
-    this.submitButton = page.locator(locators.submitButton);
+    this.accountIcon = page.locator(LoginLocators.accountIcon);
+    this.emailInput = page.locator(LoginLocators.emailInput);
+    this.passwordInput = page.locator(LoginLocators.passwordInput);
+    this.submitButton = page.locator(LoginLocators.submitButton);
 
     this.popups = {
-      closeModalBtn: page.locator(locators.popups.closeModalBtn),
-      declineOfferBtn: page.locator(locators.popups.declineOfferBtn),
-      button3: page.locator(locators.popups.button3)
+      closeModalBtn: page.locator(LoginLocators.popups.closeModalBtn),
+      declineOfferBtn: page.locator(LoginLocators.popups.declineOfferBtn),
+      button3: page.locator(LoginLocators.popups.button3)
     };
 
-    this.errorMessage = page.locator(locators.errorMessage);
-    this.logoutIndicator = page.locator(locators.logoutIndicator);
+    this.errorMessage = page.locator(LoginLocators.errorMessage);
+    this.logoutIndicator = page.locator(LoginLocators.logoutIndicator);
   }
 
   async navigateToLocale(locale) {
@@ -39,16 +40,28 @@ class LoginPage extends BasePage {
   }
 
   async openLoginModal() {
+    const currentLocale = process.env.LOCALE || 'us';
+
+    // Explicitly wait for and handle cookies for UK/EU locales
+    if (['uk', 'eu'].includes(currentLocale)) {
+      console.log(`🔹 Locale is ${currentLocale}, waiting for cookie banner...`);
+      await this.page.waitForTimeout(3000);
+      await this.handleCookieConsent(5000);
+    } else {
+      await this.handleCookieConsent(1000);
+    }
+
     await this.closeModalIfPresent();
     await this.accountIcon.first().click({ force: true });
-    await this.emailInput.waitFor({ state: "visible", timeout: 15000 });
+    await this.emailInput.waitFor({ state: "visible", timeout: testData.timeouts.xlarge });
   }
 
-  async performLogin(email = "naveed.chughtai@rltsquare.com", password = "Rlt@20250101") {
+  async performLogin(email = testData.login.email, password = testData.login.password) {
+    console.log(`Performing login with: ${email}`);
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
     await this.submitButton.click();
-    await this.page.waitForURL("**/my-account/**", { timeout: 20000 });
+    await this.page.waitForURL("**/my-account/**", { timeout: testData.timeouts.huge });
   }
 
   async isOnAccountPage() {

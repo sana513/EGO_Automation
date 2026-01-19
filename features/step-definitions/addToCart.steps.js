@@ -1,5 +1,5 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
-const AddToCartPage = require('../../pages/AddToCartPgae');
+const AddToCartPage = require('../../pages/addToCartPage');
 
 Given('I open a random product from PLP', async function () {
   this.addToCart = new AddToCartPage(this.page);
@@ -7,31 +7,48 @@ Given('I open a random product from PLP', async function () {
 });
 
 When('I select any available size', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.pdp.selectAnyAvailableSize();
 });
 
 When('I add the product to the bag', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.pdp.addToBag();
 });
 
 Then('I open the cart page', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.openCart();
 });
+
 When('I update the quantity randomly', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.updateQuantityRandomly();
 });
 
 When('I update the product size randomly', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.updateSizeRandomly();
 });
+
 When('I add the product to wishlist', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.addProductToWishlist();
 });
 
+const { testData } = require('../../config/testData');
+
+When('I apply the coupon code', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
+  await this.addToCart.applyCoupon(testData.cart.couponCode);
+});
+
 When('I apply the coupon code {string}', async function (code) {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.applyCoupon(code);
 });
 
 When('I proceed to checkout', async function () {
+  if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.proceedToCheckout();
 });

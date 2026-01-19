@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "test:e2e": "node scripts/run-test.js --feature=features/EGO_Features.feature --tags=@e2e --headless=false",
-    "test:login": "node scripts/run-test.js --feature=features/Login_Feature.feature --tags=@login --headless=false",
-    "test:registration": "node scripts/run-test.js --feature=features/Signup_Feature.feature --tags=@registration --headless=false",
-    "test:homepage": "node scripts/run-test.js --feature=features/EGO_Features.feature --tags=@homepage --headless=true",
-    "test:plp": "node scripts/run-test.js --feature=features/EGO_Features.feature --tags=@plp --headless=false",
-    "test:pdp": "node scripts/run-test.js --feature=features/PDP_Feature.feature --tags=@pdp --headless=false",
-    "test:addtocart": "node scripts/run-test.js --feature=features/AddToCart_Feature.feature --tags=@addtocart --headless=false",
-    "test:checkout": "node scripts/run-test.js --feature=features/Checkout_Feature.feature --tags=@checkout --headless=false"
+    "test:e2e": "node scripts/run-test.js --feature=features/egoFeature.feature --tags=@e2e --headless=false",
+    "test:login": "node scripts/run-test.js --feature=features/loginFeature.feature --tags=@login --headless=false",
+    "test:registration": "node scripts/run-test.js --feature=features/signupFeature.feature --tags=@registration --headless=false",
+    "test:homepage": "node scripts/run-test.js --feature=features/homePageFeature.feature --tags=@homepage --headless=true",
+    "test:plp": "node scripts/run-test.js --feature=features/plpFeature.feature --tags=@plp --headless=false",
+    "test:pdp": "node scripts/run-test.js --feature=features/pdpFeature.feature --tags=@pdp --headless=false",
+    "test:addtocart": "node scripts/run-test.js --feature=features/addToCartFeature.feature --tags=@addtocart --headless=false",
+    "test:checkout": "node scripts/run-test.js --feature=features/checkoutFeature.feature --tags=@checkout --headless=false"
   },
   "dependencies": {
     "@cucumber/cucumber": "^12.3.0",

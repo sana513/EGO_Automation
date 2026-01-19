@@ -39,7 +39,7 @@ const SUPPORTED_LOCALES = ['uk', 'us', 'eu', 'ca', 'au', 'ae'];
 function getEnvironment() {
   const env = process.env.ENV || process.env.ENVIRONMENT || DEFAULT_ENV;
   if (!SUPPORTED_ENVS.includes(env)) {
-    console.warn(`⚠️ Unsupported environment "${env}". Using default: ${DEFAULT_ENV}`);
+    console.warn(`Unsupported environment "${env}". Using default: ${DEFAULT_ENV}`);
     return DEFAULT_ENV;
   }
   return env;
@@ -48,7 +48,7 @@ function getEnvironment() {
 function getLocale() {
   const locale = process.env.LOCALE || DEFAULT_LOCALE;
   if (!SUPPORTED_LOCALES.includes(locale)) {
-    console.warn(`⚠️ Unsupported locale "${locale}". Using default: ${DEFAULT_LOCALE}`);
+    console.warn(`Unsupported locale "${locale}". Using default: ${DEFAULT_LOCALE}`);
     return DEFAULT_LOCALE;
   }
   return locale;
@@ -60,7 +60,7 @@ function getBaseUrl(env = null, locale = null) {
   const envConfig = ENV_CONFIG[environment];
 
   if (!envConfig) {
-    console.error(`❌ Environment "${environment}" not found. Using default.`);
+    console.error(`Environment "${environment}" not found. Using default.`);
     return ENV_CONFIG[DEFAULT_ENV][DEFAULT_LOCALE];
   }
 

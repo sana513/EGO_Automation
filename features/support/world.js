@@ -10,7 +10,6 @@ class CustomWorld {
     this.browser = null;
     this.context = null;
     this.page = null;
-    // Store global configuration
     this.config = getConfig();
   }
 }
@@ -22,10 +21,7 @@ let context;
 let page;
 
 BeforeAll(async function () {
-  // Log configuration at the start of test run
   logConfig();
-
-  // Check if HEADLESS env var is set
   const headless = process.env.HEADLESS === 'true';
 
   browser = await webkit.launch({ headless: headless, slowMo: 100 });

@@ -1,7 +1,8 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
-const ProductListingPage = require('../../pages/PLP_Page');
-const BasePage = require('../../pages/BasePage');
+const ProductListingPage = require('../../pages/plpPage');
+const BasePage = require('../../pages/basePage');
 const { expect } = require('@playwright/test');
+const { testData } = require('../../config/testData');
 
 Given('I open the PLP page', async function () {
   this.basePage = new BasePage(this.page);
@@ -10,13 +11,13 @@ Given('I open the PLP page', async function () {
   await this.plp.openFirstAvailableSubCategory();
 });
 Then('all product tiles should be visible', async function () {
-  await this.plp.verifyProductsUI(40);
+  await this.plp.verifyProductsUI(testData.plp.productLimit);
 });
 
 When('I scroll down and click load more until all products are loaded', async function () {
   await this.plp.loadMoreOnce();
 
-  await this.plp.verifyProductsUI(40);
+  await this.plp.verifyProductsUI(testData.plp.productLimit);
 });
 
 When('I open the first product', async function () {

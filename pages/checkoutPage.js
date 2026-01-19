@@ -1,7 +1,8 @@
 const { expect } = require('@playwright/test');
-const locators = require('../locators/EGO_Locators').CheckoutLocators;
-const BasePage = require('../pages/BasePage');
-const AddToCartPage = require('../pages/AddToCartPgae');
+const { CheckoutLocators } = require('../locators/checkoutLocators');
+const BasePage = require('./basePage');
+const AddToCartPage = require('./addToCartPage');
+const { testData } = require('../config/testData');
 
 class CheckoutPage extends BasePage {
     constructor(page) {
@@ -23,15 +24,15 @@ class CheckoutPage extends BasePage {
     }
 
     async verifyCheckoutPage() {
-        await expect(this.page).toHaveTitle('Checkout - EGO');
+        await expect(this.page).toHaveTitle(/Checkout/i);
     }
 
     async enterEmail(email) {
-        await this.page.fill(locators.emailInput, email);
+        await this.page.fill(CheckoutLocators.emailInput, email);
     }
 
     async clickContinue() {
-        await this.page.click(locators.continueButton);
+        await this.page.click(CheckoutLocators.continueButton);
     }
 
     async fillShippingAddress(data) {
@@ -39,12 +40,7 @@ class CheckoutPage extends BasePage {
         await this.page.waitForTimeout(3000);
 
         // Check for "Enter address manually" link/button and click it if present
-        const manualEntrySelectors = [
-            'button:has-text("Enter address manually")',
-            'a:has-text("Enter address manually")',
-            'span:has-text("Enter address manually")',
-            'text=Or Enter Your Address Manually'
-        ];
+        const manualEntrySelectors = testData.checkout.manualEntryLabels;
 
         for (const selector of manualEntrySelectors) {
             if (await this.page.isVisible(selector)) {
@@ -58,7 +54,6 @@ class CheckoutPage extends BasePage {
         const safeFill = async (selector, value, name) => {
             try {
                 const element = this.page.locator(selector);
-                // Wait specifically for this field
                 await element.waitFor({ state: 'visible', timeout: 5000 }).catch(() => { });
 
                 if (await element.isVisible()) {
@@ -94,23 +89,22 @@ class CheckoutPage extends BasePage {
             }
         };
 
-        await safeFill(locators.shipping.firstNameInput, data.firstName, 'First Name');
-        await safeFill(locators.shipping.lastNameInput, data.lastName, 'Last Name');
-        await safeFill(locators.shipping.addressLine1Input, data.addressLine1, 'Address Line 1');
+        await safeFill(CheckoutLocators.shipping.firstNameInput, data.firstName, 'First Name');
+        await safeFill(CheckoutLocators.shipping.lastNameInput, data.lastName, 'Last Name');
+        await safeFill(CheckoutLocators.shipping.addressLine1Input, data.addressLine1, 'Address Line 1');
 
         if (data.addressLine2) {
-            await safeFill(locators.shipping.addressLine2Input, data.addressLine2, 'Address Line 2');
+            await safeFill(CheckoutLocators.shipping.addressLine2Input, data.addressLine2, 'Address Line 2');
         }
 
-        await safeFill(locators.shipping.cityInput, data.city, 'City');
-        await safeFill(locators.shipping.postCodeInput, data.postCode, 'Post Code');
-        await safeSelect(locators.shipping.countryCodeSelect, data.countryCode, 'Country');
+        await safeFill(CheckoutLocators.shipping.cityInput, data.city, 'City');
+        await safeFill(CheckoutLocators.shipping.postCodeInput, data.postCode, 'Post Code');
+        await safeSelect(CheckoutLocators.shipping.countryCodeSelect, data.countryCode, 'Country');
 
-        // Handle Province/State - critical for US/CA
-        await this.page.waitForTimeout(1000); // Wait for state field to update based on country
+        await this.page.waitForTimeout(1000);
 
         const provinceSelectors = [
-            locators.shipping.provinceSelect,
+            CheckoutLocators.shipping.provinceSelect,
             'select[name="region_id"]',
             'select[name="region"]',
             'input[name="region"]',
@@ -124,9 +118,6 @@ class CheckoutPage extends BasePage {
                 console.log(`Found Province field: ${selector}`);
                 const tagName = await el.evaluate(e => e.tagName.toLowerCase());
                 if (tagName === 'select') {
-                    // Try by value or label (e.g. "NY" or "New York")
-                    // Often value is region ID integer, so label is safer if text
-                    // But safeSelect uses selectOption which handles value/label/index
                     await el.selectOption({ label: data.province }).catch(async () => {
                         await el.selectOption({ value: data.province }).catch(() => { });
                     });
@@ -141,19 +132,26 @@ class CheckoutPage extends BasePage {
         }
 
         if (!provinceFilled) {
-            console.log('⚠ Warning: Could not find visible Province/State field. Form submission might fail.');
+            console.log('⚠ Warning: Could not find visible Province/State field.');
         }
 
-        await safeFill(locators.shipping.phoneInput, data.phoneNumber, 'Phone');
+        await safeFill(CheckoutLocators.shipping.phoneInput, data.phoneNumber, 'Phone');
 
         await this.page.waitForTimeout(2000);
 
-        const continueBtn = this.page.locator(locators.shipping.shippingContinueButton);
-        await continueBtn.waitFor({ state: 'visible', timeout: 10000 });
+        const continueBtn = this.page.locator(CheckoutLocators.shipping.shippingContinueButton);
+        await continueBtn.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
+
+        // Wait for button to be enabled (not loading)
+        await this.page.waitForFunction(
+            (btn) => !btn.disabled && !btn.classList.contains('is-loading'),
+            await continueBtn.elementHandle(),
+            { timeout: 30000 }
+        );
+
         await continueBtn.click();
         console.log('✓ Clicked shipping continue button');
 
-        // Check for error messages
         await this.page.waitForTimeout(2000);
         const errorMsg = this.page.locator('.message-error, .error-message, [role="alert"]').first();
         if (await errorMsg.isVisible()) {
@@ -162,15 +160,12 @@ class CheckoutPage extends BasePage {
             throw new Error(`Shipping form submission failed: ${text}`);
         }
 
-        // Handle potential Shipping Method step
         await this.handleShippingMethod();
     }
 
     async handleShippingMethod() {
         console.log('Checking for Shipping Method step...');
         try {
-            // Wait to see if we are on shipping method step
-            // Common selector for shipping method continue button
             const methodsContinueBtn = this.page.locator('button[data-testid="shipping-method-continue"], button:has-text("Continue to payment"), #checkout-shipping-method-continue');
 
             if (await methodsContinueBtn.isVisible({ timeout: 5000 })) {
@@ -188,41 +183,36 @@ class CheckoutPage extends BasePage {
         console.log('Filling card details...');
         await this.page.waitForTimeout(2000);
 
-        const frame = this.page.frameLocator(locators.payment.stripeIframe).first();
+        const frame = this.page.frameLocator(CheckoutLocators.payment.stripeIframe).first();
 
-        // Wait for iframe to be attached
-        await this.page.waitForSelector(locators.payment.stripeIframe, { timeout: 20000 });
+        await this.page.waitForSelector(CheckoutLocators.payment.stripeIframe, { timeout: 20000 });
 
         try {
-            await frame.locator(locators.payment.cardNumberInput).waitFor({ state: 'visible', timeout: 10000 });
-            await frame.locator(locators.payment.cardNumberInput).fill(card.number);
-            await frame.locator(locators.payment.cardExpiryInput).fill(card.expiry);
-            await frame.locator(locators.payment.cardCvcInput).fill(card.cvc);
+            await frame.locator(CheckoutLocators.payment.cardNumberInput).waitFor({ state: 'visible', timeout: 10000 });
+            await frame.locator(CheckoutLocators.payment.cardNumberInput).fill(card.number);
+            await frame.locator(CheckoutLocators.payment.cardExpiryInput).fill(card.expiry);
+            await frame.locator(CheckoutLocators.payment.cardCvcInput).fill(card.cvc);
 
-            // Name might be outside iframe or different
-            // Try inside iframe first
-            if (await frame.locator(locators.payment.cardNameInput).isVisible().catch(() => false)) {
-                await frame.locator(locators.payment.cardNameInput).fill(card.name);
+            if (await frame.locator(CheckoutLocators.payment.cardNameInput).isVisible().catch(() => false)) {
+                await frame.locator(CheckoutLocators.payment.cardNameInput).fill(card.name);
             } else {
-                // Try outside
-                const nameInput = this.page.locator('#card-name'); // Guessing
+                const nameInput = this.page.locator('#card-name');
                 if (await nameInput.isVisible()) await nameInput.fill(card.name);
             }
 
             console.log('✓ Filled card details');
         } catch (e) {
             console.error('✗ Failed to fill card details:', e.message);
-            // Don't throw, let clickPayNow try
         }
     }
 
     async clickPayNow() {
         await this.page.waitForTimeout(1000);
-        await this.page.click(locators.payment.payNowButton);
+        await this.page.click(CheckoutLocators.payment.payNowButton);
     }
 
     async verifyOrderConfirmation() {
-        await expect(this.page).toHaveTitle('Order Confirmation - EGO');
+        await expect(this.page).toHaveTitle(new RegExp(testData.checkout.expectedTitles.confirmation, 'i'));
     }
 }
 

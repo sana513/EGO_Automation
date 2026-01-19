@@ -1,6 +1,7 @@
-const BasePage = require('../pages/BasePage');
+const BasePage = require('./basePage');
 const { expect } = require('@playwright/test');
-const { PLPLocators } = require('../locators/EGO_Locators');
+const { PLPLocators } = require('../locators/plpLocators');
+const { testData } = require('../config/testData');
 
 class ProductListingPage extends BasePage {
   constructor(page) {
@@ -22,7 +23,7 @@ class ProductListingPage extends BasePage {
     this.subCategoryLinks = PLPLocators.subCategoryLinks;
   }
 
-  async waitForPLP(timeout = 30000) {
+  async waitForPLP(timeout = testData.timeouts.extreme) {
     await this.page.waitForSelector(this.productTile, { timeout });
   }
 
@@ -84,7 +85,7 @@ class ProductListingPage extends BasePage {
         ({ selector, count }) =>
           document.querySelectorAll(selector).length > count,
         { selector: this.productTile, count: beforeCount },
-        { timeout: 20000 }
+        { timeout: testData.timeouts.huge }
       );
 
       await this.page.waitForTimeout(500);
@@ -101,22 +102,20 @@ class ProductListingPage extends BasePage {
       throw new Error('No main categories found');
     }
 
-    // Iterate through main categories to find one with subcategories
     for (let i = 0; i < mainCount; i++) {
-      // Skip "New In" or empty categories if needed, or just try them all
       const mainCat = mainCategories.nth(i);
       const catText = await mainCat.textContent().catch(() => '');
 
       console.log(`Checking category ${i}: ${catText}`);
 
       await this.closeModalIfPresent();
-      await mainCat.hover();
+      await this.hover(mainCat);
       await this.page.waitForTimeout(1000);
 
       const subCategories = this.page
         .locator(this.subCategoryLinks)
         .filter({ visible: true })
-        .filter({ hasNotText: 'NEW IN' })
+        .filter({ hasNotText: testData.plp.subCategoryFilterIgnore })
         .filter({
           has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
         });
@@ -126,7 +125,7 @@ class ProductListingPage extends BasePage {
         console.log(`Found ${subCount} subcategories in "${catText}"`);
         await subCategories.first().click({ force: true });
         await this.waitForPLP();
-        return; // Success
+        return; 
       }
     }
 
@@ -169,17 +168,17 @@ class ProductListingPage extends BasePage {
     const mainText = (await mainCat.textContent()).trim();
     console.log(`Hovering over main category: ${mainText}`);
 
-    await mainCat.hover();
+    await this.hover(mainCat);
 
     const subCategories = this.page
       .locator(this.subCategoryLinks)
       .filter({ visible: true })
-      .filter({ hasNotText: 'NEW IN' })
+      .filter({ hasNotText: testData.plp.subCategoryFilterIgnore })
       .filter({
         has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
       });
 
-    await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => { });
+    await subCategories.first().waitFor({ state: 'visible', timeout: testData.timeouts.medium }).catch(() => { });
 
     const subCount = await subCategories.count();
     console.log(`Found ${subCount} visible subcategories`);
@@ -208,13 +207,13 @@ class ProductListingPage extends BasePage {
       const text = (await mainCat.textContent()).trim();
       if (!text) continue;
 
-      await mainCat.hover();
+      await this.hover(mainCat);
       await this.page.waitForTimeout(100);
 
       const subCategories = this.page
         .locator(this.subCategoryLinks)
         .filter({ visible: true })
-        .filter({ hasNotText: 'NEW IN' })
+        .filter({ hasNotText: testData.plp.subCategoryFilterIgnore })
         .filter({
           has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
         });

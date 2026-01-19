@@ -13,7 +13,7 @@ Scenario: Complete checkout flow from product selection to order placement
     And I proceed to checkout
     
     # Complete checkout process
-    When I enter email "sana.zafar@rltsquare.com" for checkout
+    When I enter email for checkout
     And I continue to shipping
     And I fill in shipping details
     And I enter valid card details

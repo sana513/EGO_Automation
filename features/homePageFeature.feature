@@ -11,10 +11,7 @@ Background:
 
     # Validate product category grid
     When I scroll down and verify product category grid
-    Then I should see Co-Ords category
-    And I should see Tops category
-    And I should see Dresses category
-    And I should see Loungewear category
+    Then I should see all configured categories
 
     # Validate additional homepage sections
     Then I should see Popular Categories section
@@ -22,5 +19,5 @@ Background:
 
     # User action: Add a product from What's Hot
     When I click any random Add CTA from What's Hot section
-    And I select any available size
-    Then I add the product to the bag
+    And I select any available size from the quick-add modal
+    Then I add the product to the bag from the homepage section

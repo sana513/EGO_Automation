@@ -1,5 +1,11 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const CheckoutPage = require('../../pages/checkoutPage');
+const { testData } = require('../../config/testData');
+
+When('I enter email for checkout', async function () {
+    this.checkoutPage = new CheckoutPage(this.page);
+    await this.checkoutPage.enterEmail(testData.checkout.email);
+});
 
 When('I enter email {string} for checkout', async function (email) {
     this.checkoutPage = new CheckoutPage(this.page);
@@ -11,25 +17,15 @@ When('I continue to shipping', async function () {
 });
 
 When('I fill in shipping details', async function () {
-    await this.checkoutPage.fillShippingAddress({
-        firstName: 'John',
-        lastName: 'Doe',
-        addressLine1: '123 Main Street',
-        addressLine2: 'Apt 4B',
-        city: 'New York',
-        postCode: '10001',
-        countryCode: 'US',
-        province: 'NY',
-        phoneNumber: '1234567890'
-    });
+    await this.checkoutPage.fillShippingAddress(testData.checkout.shipping);
 });
 
 When('I enter valid card details', async function () {
     await this.checkoutPage.fillCardDetails({
-        number: '4242424242424242',
-        expiry: '12/30',
-        cvc: '123',
-        name: 'John Doe'
+        number: testData.checkout.payment.cardNumber,
+        expiry: testData.checkout.payment.expiry,
+        cvc: testData.checkout.payment.cvc,
+        name: testData.checkout.payment.cardName
     });
 });
 

@@ -11,5 +11,5 @@ Scenario: Update cart and proceed to checkout
   When I update the quantity randomly
   And I update the product size randomly
   And I add the product to wishlist
-  And I apply the coupon code "R5D48EF48"
+  And I apply the coupon code
   And I proceed to checkout
