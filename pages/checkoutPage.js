@@ -39,7 +39,6 @@ class CheckoutPage extends BasePage {
         console.log('Waiting for shipping form...');
         await this.page.waitForTimeout(3000);
 
-        // Check for "Enter address manually" link/button and click it if present
         const manualEntrySelectors = testData.checkout.manualEntryLabels;
 
         for (const selector of manualEntrySelectors) {
@@ -141,8 +140,6 @@ class CheckoutPage extends BasePage {
 
         const continueBtn = this.page.locator(CheckoutLocators.shipping.shippingContinueButton);
         await continueBtn.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
-
-        // Wait for button to be enabled (not loading)
         await this.page.waitForFunction(
             (btn) => !btn.disabled && !btn.classList.contains('is-loading'),
             await continueBtn.elementHandle(),

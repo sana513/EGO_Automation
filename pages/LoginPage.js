@@ -42,7 +42,6 @@ class loginPage extends BasePage {
   async openLoginModal() {
     const currentLocale = process.env.LOCALE || 'us';
 
-    // Explicitly wait for and handle cookies for UK/EU locales
     if (['uk', 'eu'].includes(currentLocale)) {
       console.log(`🔹 Locale is ${currentLocale}, waiting for cookie banner...`);
       await this.page.waitForTimeout(3000);

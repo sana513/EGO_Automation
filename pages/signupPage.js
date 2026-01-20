@@ -53,11 +53,10 @@ class SignupPage extends BasePage {
     const currentLocale = process.env.LOCALE || 'us';
     await this.navigate(this.getBaseUrl(currentLocale));
 
-    // Explicitly wait for and handle cookies for UK/EU locales
     if (['uk', 'eu'].includes(currentLocale)) {
       console.log(`🔹 Locale is ${currentLocale}, waiting for cookie banner...`);
       await this.page.waitForTimeout(3000);
-      await this.handleCookieConsent(5000); // 5s timeout to wait for banner
+      await this.handleCookieConsent(5000);
     } else {
       await this.handleCookieConsent(1000);
     }
