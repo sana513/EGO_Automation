@@ -125,7 +125,7 @@ class ProductListingPage extends BasePage {
         console.log(`Found ${subCount} subcategories in "${catText}"`);
         await subCategories.first().click({ force: true });
         await this.waitForPLP();
-        return;
+        return; 
       }
     }
 
