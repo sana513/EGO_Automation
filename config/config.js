@@ -1,3 +1,4 @@
+require('dotenv').config();
 const ENV_CONFIG = {
   dev: {
     uk: 'https://vsfdev.ego.co.uk',

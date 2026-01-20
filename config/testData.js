@@ -1,10 +1,10 @@
 const testData = {
     login: {
-        email: "naveed.chughtai@rltsquare.com",
-        password: "Rlt@20250101"
+        email: process.env.TEST_USER_EMAIL || "naveed.chughtai@rltsquare.com",
+        password: process.env.TEST_USER_PASSWORD || "Rlt@20250101"
     },
     checkout: {
-        email: "sana.zafar@rltsquare.com",
+        email: process.env.CHECKOUT_EMAIL || "sana.zafar@rltsquare.com",
         shipping: {
             firstName: "John",
             lastName: "Doe",
@@ -17,12 +17,12 @@ const testData = {
             phoneNumber: "1234567890"
         },
         payment: {
-            cardNumber: "4242424242424242",
+            cardNumber: process.env.PAYMENT_CARD_NUMBER || "4242424242424242",
             expiry: "12/30",
-            cvc: "123",
+            cvc: process.env.PAYMENT_CVC || "123",
             cardName: "John Doe"
         },
-        couponCode: "R5D48EF48",
+        couponCode: process.env.COUPON_CODE || "R5D48EF48",
         expectedTitles: {
             checkout: "Checkout - EGO",
             confirmation: "Order Confirmation - EGO"
@@ -58,8 +58,8 @@ const testData = {
         personalDetails: {
             firstName: "Naveed",
             lastName: "Chughtai",
-            password: "Rlt@20250101",
-            confirmPassword: "Rlt@20250101"
+            password: process.env.TEST_USER_PASSWORD || "Rlt@20250101",
+            confirmPassword: process.env.TEST_USER_PASSWORD || "Rlt@20250101"
         },
         dob: {
             months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -105,7 +105,7 @@ const testData = {
         labels: {
             outOfStock: "out of stock"
         },
-        couponCode: "R5D48EF48"
+        couponCode: process.env.COUPON_CODE || "R5D48EF48"
     },
     timeouts: {
         small: 2000,
