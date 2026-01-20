@@ -3,7 +3,7 @@ const { getBaseUrl } = require('../config/config');
 const { BaseLocators } = require('../locators/baseLocators');
 const { testData } = require('../config/testData');
 
-class BasePage {
+class basePage {
   constructor(page) {
     this.page = page;
     this.modals = {
@@ -171,4 +171,4 @@ class BasePage {
   }
 }
 
-module.exports = BasePage;
+module.exports = basePage;

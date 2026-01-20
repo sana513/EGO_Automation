@@ -1,10 +1,10 @@
 const { expect } = require('@playwright/test');
 const { CheckoutLocators } = require('../locators/checkoutLocators');
-const BasePage = require('./basePage');
+const basePage = require('./basePage');
 const AddToCartPage = require('./addToCartPage');
 const { testData } = require('../config/testData');
 
-class CheckoutPage extends BasePage {
+class CheckoutPage extends basePage {
     constructor(page) {
         super(page);
         this.page = page;
