@@ -1,9 +1,9 @@
 const { expect } = require("@playwright/test");
-const BasePage = require("./basePage");
+const basePage = require("./basePage");
 const { HomePageLocators } = require("../locators/homePageLocators");
 const { testData } = require("../config/testData");
 
-class HomePage extends BasePage {
+class HomePage extends basePage {
   constructor(page) {
     super(page);
   }

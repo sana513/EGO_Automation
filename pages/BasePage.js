@@ -3,7 +3,7 @@ const { getBaseUrl } = require('../config/config');
 const { BaseLocators } = require('../locators/baseLocators');
 const { testData } = require('../config/testData');
 
-class basePage {
+class BasePage {
   constructor(page) {
     this.page = page;
     this.modals = {
@@ -49,12 +49,10 @@ class basePage {
         if (await element.isVisible({ timeout: 1000 }).catch(() => false)) {
           console.log(`🔹 Cookie banner found: ${selector}, clicking accept...`);
           await element.click({ force: true }).catch(() => { });
-          await this.page.waitForTimeout(2000); // Wait for banner to start disappearing
+          await this.page.waitForTimeout(2000);
           break;
         }
       }
-
-      // Ensure overlays are removed even if button wasn't found or worked
       const overlayCount = await this.page.evaluate((overlays) => {
         let count = 0;
         overlays.forEach(sel => {
@@ -73,7 +71,6 @@ class basePage {
         console.log(`🧹 Removed ${overlayCount} cookie overlays/banners via scripts`);
       }
 
-      // Secondary check for the specific problematic underlay
       const underlay = this.page.locator('#CybotCookiebotDialogBodyUnderlay');
       if (await underlay.isVisible({ timeout: 500 }).catch(() => false)) {
         console.log('⚠️ Underlay still visible, removing it specifically...');

@@ -1,8 +1,8 @@
-const basePage = require("./basePage");
+const BasePage = require("./basePage");
 const { LoginLocators } = require("../locators/loginLocators");
 const { testData } = require("../config/testData");
 
-class loginPage extends BasePage {
+class LoginPage extends BasePage {
   constructor(page) {
     super(page);
     this.page = page;
@@ -42,7 +42,6 @@ class loginPage extends BasePage {
   async openLoginModal() {
     const currentLocale = process.env.LOCALE || 'us';
 
-    // Explicitly wait for and handle cookies for UK/EU locales
     if (['uk', 'eu'].includes(currentLocale)) {
       console.log(`🔹 Locale is ${currentLocale}, waiting for cookie banner...`);
       await this.page.waitForTimeout(3000);

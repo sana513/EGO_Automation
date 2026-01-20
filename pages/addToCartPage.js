@@ -1,9 +1,9 @@
 const ProductDetailPage = require('./pdpPage');
-const BasePage = require('./basePage');
+const basePage = require('./basePage');
 const { AddToCartLocators } = require('../locators/addToCartLocators');
 const { testData } = require('../config/testData');
 
-class AddToCartPage extends BasePage {
+class AddToCartPage extends basePage {
   constructor(page) {
     super(page);
     this.page = page;
