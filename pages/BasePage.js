@@ -3,7 +3,7 @@ const { getBaseUrl } = require('../config/config');
 const { BaseLocators } = require('../locators/baseLocators');
 const { testData } = require('../config/testData');
 
-class basePage {
+class BasePage {
   constructor(page) {
     this.page = page;
     this.modals = {
@@ -43,11 +43,11 @@ class basePage {
 
   async handleCookieConsent(timeout = 5000) {
     try {
-      console.log('🔍 Checking for cookie banner...');
+      console.log('Checking for cookie banner...');
       for (const selector of BaseLocators.cookieConsent.acceptButtons) {
         const element = this.page.locator(selector).first();
         if (await element.isVisible({ timeout: 1000 }).catch(() => false)) {
-          console.log(`🔹 Cookie banner found: ${selector}, clicking accept...`);
+          console.log(`Cookie banner found: ${selector}, clicking accept...`);
           await element.click({ force: true }).catch(() => { });
           await this.page.waitForTimeout(2000); // Wait for banner to start disappearing
           break;

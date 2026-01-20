@@ -1,8 +1,8 @@
-const basePage = require("./basePage");
+const BasePage = require("./basePage");
 const { LoginLocators } = require("../locators/loginLocators");
 const { testData } = require("../config/testData");
 
-class loginPage extends BasePage {
+class LoginPage extends BasePage {
   constructor(page) {
     super(page);
     this.page = page;
