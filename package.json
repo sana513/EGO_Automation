@@ -6,7 +6,7 @@
     "test:e2e": "node scripts/run-test.js --feature=features/egoFeature.feature --tags=@e2e --headless=false",
     "test:login": "node scripts/run-test.js --feature=features/loginFeature.feature --tags=@login --headless=false",
     "test:registration": "node scripts/run-test.js --feature=features/signupFeature.feature --tags=@registration --headless=false",
-    "test:homepage": "node scripts/run-test.js --feature=features/homePageFeature.feature --tags=@homepage --headless=false",
+    "test:homepage": "node scripts/run-test.js --feature=features/homePageFeature.feature --tags=@homepage --headless=true",
     "test:plp": "node scripts/run-test.js --feature=features/plpFeature.feature --tags=@plp --headless=false",
     "test:pdp": "node scripts/run-test.js --feature=features/pdpFeature.feature --tags=@pdp --headless=false",
     "test:addtocart": "node scripts/run-test.js --feature=features/addToCartFeature.feature --tags=@addtocart --headless=false",
