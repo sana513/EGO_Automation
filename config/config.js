@@ -24,17 +24,17 @@ const ENV_CONFIG = {
     au: 'https://egoshoes.com/au',
     ae: 'https://egoshoes.com/ae'
   },
-  'gcp-stage': {
-    uk: 'https://ego-gcp-unitedstorefront-staging-ego-co-uk.cfstack.com',
-    us: 'https://ego-gcp-unitedstorefront-staging-ego-co-uk.cfstack.com/us',
-    eu: 'https://ego-gcp-unitedstorefront-staging-ego-co-uk.cfstack.com/eu'
+  'cfstaging': {
+    uk: 'https://cfstaging.ego.co.uk',
+    us: 'https://cfstaging.egoshoes.com/us',
+    eu: 'https://cfstaging.egoshoes.com/eu'
   }
 };
 
 const DEFAULT_ENV = 'stage';
 const DEFAULT_LOCALE = 'us';
 
-const SUPPORTED_ENVS = ['dev', 'stage', 'prod', 'gcp-stage'];
+const SUPPORTED_ENVS = ['dev', 'stage', 'prod', 'cfstaging'];
 const SUPPORTED_LOCALES = ['uk', 'us', 'eu', 'ca', 'au', 'ae'];
 
 function getEnvironment() {
@@ -79,7 +79,7 @@ function getConfig() {
 function logConfig() {
   const config = getConfig();
   console.log('='.repeat(60));
-  console.log('🌍 Test Configuration');
+  console.log('Test Configuration');
   console.log('='.repeat(60));
   console.log(`Environment: ${config.environment}`);
   console.log(`Locale:      ${config.locale}`);

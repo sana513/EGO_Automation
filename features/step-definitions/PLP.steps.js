@@ -1,13 +1,14 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const ProductListingPage = require('../../pages/plpPage');
 const BasePage = require('../../pages/basePage');
+const ProductDetailPage = require('../../pages/pdpPage');
 const { expect } = require('@playwright/test');
 const { testData } = require('../../config/testData');
 
 Given('I open the PLP page', async function () {
   this.basePage = new BasePage(this.page);
   this.plp = new ProductListingPage(this.page);
-  await this.basePage.navigate();
+  await this.basePage.ensureHomeAndReady();
   await this.plp.openFirstAvailableSubCategory();
 });
 Then('all product tiles should be visible', async function () {
@@ -28,6 +29,15 @@ When('I open product number {int}', async function (index) {
   await this.plp.openProductByIndex(index - 1);
 });
 
+Given('I open the configured product from PLP', async function () {
+  this.basePage = new BasePage(this.page);
+  this.plp = new ProductListingPage(this.page);
+  await this.basePage.ensureHomeAndReady();
+  const pdp = new ProductDetailPage(this.page);
+  const index = testData.plp.defaultProductIndex - 1;
+  await pdp.openProductFromPLPByIndex(index);
+});
+
 Then('I should be on the PDP page', async function () {
   await expect(this.page).toHaveURL(/\/p\//i);
 });
@@ -35,19 +45,18 @@ Then('I should be on the PDP page', async function () {
 Given('I navigate through all subcategories sequentially and verify PLP visibility', async function () {
   this.basePage = new BasePage(this.page);
   this.plp = new ProductListingPage(this.page);
-
   console.log(`Navigating to home page...`);
-  await this.basePage.navigate();
-
+  await this.basePage.ensureHomeAndReady();
   const structure = await this.plp.getNavigationStructure();
   console.log(`Found ${structure.length} usable main categories. Starting fast sequential verification...`);
 
+  const currentLocale = process.env.LOCALE || 'us';
   for (const item of structure) {
     if (item.subCount === 0) continue;
 
     console.log(`\n--- Verifying: ${item.mainText} ---`);
 
-    await this.basePage.navigate();
+    await this.basePage.ensureHomeAndReady(currentLocale);
 
     await this.plp.openSubCategory(item.mainIndex, 0);
     await this.plp.verifyPLPHeaderContent();

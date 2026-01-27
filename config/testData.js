@@ -1,4 +1,9 @@
 const testData = {
+    e2e: {
+        registrationLocale: "uk",
+        checkoutEmail: process.env.CHECKOUT_EMAIL || "sana.zafar@rltsquare.com",
+        couponCode: process.env.COUPON_CODE || "R5D48EF48"
+    },
     login: {
         email: process.env.TEST_USER_EMAIL || "naveed.chughtai@rltsquare.com",
         password: process.env.TEST_USER_PASSWORD || "Rlt@20250101"
@@ -21,6 +26,16 @@ const testData = {
             expiry: "12/30",
             cvc: process.env.PAYMENT_CVC || "123",
             cardName: "John Doe"
+        },
+        paymentMethods: {
+            default: "card",
+            card: "Card",
+            paypal: "PayPal",
+            klarna: "Klarna",
+            testprovider: "Test Provider",
+            bank: "Bank Transfer",
+            afterpay: "Afterpay",
+            clearpay: "Clearpay"
         },
         couponCode: process.env.COUPON_CODE || "R5D48EF48",
         expectedTitles: {
@@ -91,6 +106,35 @@ const testData = {
                     city: "New York",
                     postCode: "10001"
                 }
+            },
+            ae: {
+                country: "United Arab Emirates",
+                phone: "501234567",
+                address: {
+                    street: "Sheikh Zayed Road",
+                    city: "Dubai",
+                    postCode: "00000"
+                }
+            },
+            ca: {
+                country: "Canada",
+                phone: "4165551234",
+                address: {
+                    street: "123 Yonge Street",
+                    city: "Toronto",
+                    postCode: "M5B 1M4",
+                    state: "Ontario"
+                }
+            },
+            au: {
+                country: "Australia",
+                phone: "412345678",
+                address: {
+                    street: "123 George Street",
+                    city: "Sydney",
+                    postCode: "2000",
+                    state: "New South Wales"
+                }
             }
         }
     },
@@ -110,10 +154,36 @@ const testData = {
     timeouts: {
         small: 2000,
         medium: 5000,
-        large: 10000,
-        xlarge: 15000,
-        huge: 20000,
-        extreme: 30000
+        large: 15000,
+        xlarge: 25000,
+        huge: 30000,
+        extreme: 45000
+    },
+    search: {
+        keywords: {
+            valid: "dress",
+            invalid: "nonexistentproductxyz",
+            partial: "dres",
+            suggestionTrigger: "dress",
+            oos: "sold out",
+            trending: "Trending"
+        },
+        placeholder: "Search...",
+        noResultsMessage: "Products Matching|0 STYLES",
+        trendingHeader: "Trending Categories|Trending",
+        outOfStockPattern: "Sold Out|Out of Stock"
+    },
+    filterSort: {
+        sortOptions: {
+            relevance: "Relevance",
+            priceLowToHigh: "Price from Low to High",
+            priceHighToLow: "Price from High to Low"
+        },
+        filters: {
+            color: "Black",
+            size: "One Size",
+            priceRange: "$0-$50"
+        }
     }
 };
 

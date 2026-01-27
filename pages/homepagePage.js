@@ -2,6 +2,7 @@ const { expect } = require("@playwright/test");
 const basePage = require("./basePage");
 const { HomePageLocators } = require("../locators/homePageLocators");
 const { testData } = require("../config/testData");
+const { settle } = require("../utils/dynamicWait");
 
 class HomePage extends basePage {
   constructor(page) {
@@ -9,7 +10,9 @@ class HomePage extends basePage {
   }
 
   async open(country = null) {
-    await this.navigate(this.getBaseUrl(country || 'us'));
+    // Use LOCALE from environment if set, otherwise use country parameter or default to 'us'
+    const locale = process.env.LOCALE || country || 'us';
+    await this.navigate(this.getBaseUrl(locale));
   }
 
   async verifyAllHomepageElements() {
@@ -22,7 +25,7 @@ class HomePage extends basePage {
     await expect(this.page.locator(HomePageLocators.HERO_BANNER)).toBeVisible();
 
     await this.page.mouse.wheel(0, 800);
-    await this.page.waitForTimeout(500);
+    await settle(this.page, 300);
     await this.closeModalIfPresent();
 
     const productGrid = this.page.locator(HomePageLocators.PRODUCT_GRID_MAIN);
@@ -35,13 +38,13 @@ class HomePage extends basePage {
 
     const popularHeading = this.page.locator(HomePageLocators.POPULAR_CATEGORY_HEADING);
     await popularHeading.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(500);
+    await settle(this.page, 300);
     await this.closeModalIfPresent();
     await expect(popularHeading).toBeVisible();
 
     const whatsHotHeading = this.page.locator(HomePageLocators.WHATS_HOT_HEADING);
     await whatsHotHeading.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(500);
+    await settle(this.page, 300);
     await this.closeModalIfPresent();
     await expect(whatsHotHeading).toBeVisible();
   }
@@ -53,7 +56,7 @@ class HomePage extends basePage {
   async scrollToProductGrid() {
     const grid = this.page.locator(HomePageLocators.PRODUCT_GRID_MAIN);
     await this.page.mouse.wheel(0, 1200);
-    await this.page.waitForTimeout(800);
+    await settle(this.page, 400);
     await this.closeModalIfPresent();
     await grid.waitFor({ state: "visible", timeout: testData.timeouts.extreme });
     await grid.scrollIntoViewIfNeeded();
@@ -83,7 +86,7 @@ class HomePage extends basePage {
     const buttons = this.page.locator(HomePageLocators.WHATS_HOT_ADD_BUTTONS);
 
     await heading.scrollIntoViewIfNeeded();
-    await this.page.waitForTimeout(600);
+    await settle(this.page, 400);
     await this.closeModalIfPresent();
 
     let visibleIndexes = [];
@@ -99,7 +102,7 @@ class HomePage extends basePage {
 
       if (!visibleIndexes.length) {
         await this.page.mouse.wheel(0, 700);
-        await this.page.waitForTimeout(500);
+        await settle(this.page, 300);
         await this.closeModalIfPresent();
         attempts++;
       }
@@ -132,10 +135,7 @@ class HomePage extends basePage {
   async addToBag() {
     const addBtn = this.page.locator(HomePageLocators.ADD_TO_BAG_BUTTON);
     await addBtn.waitFor({ state: "visible", timeout: testData.timeouts.medium });
-    await this.page.waitForFunction(
-      el => !el.hasAttribute("disabled"),
-      await addBtn.elementHandle()
-    );
+    await settle(this.page, 200);
     await this.closeModalIfPresent();
     await addBtn.click();
   }

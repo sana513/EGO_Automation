@@ -3,23 +3,27 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "test:e2e": "node scripts/run-test.js --feature=features/egoFeature.feature --tags=@e2e --headless=false",
-    "test:login": "node scripts/run-test.js --feature=features/loginFeature.feature --tags=@login --headless=false",
-    "test:registration": "node scripts/run-test.js --feature=features/signupFeature.feature --tags=@registration --headless=false",
-    "test:homepage": "node scripts/run-test.js --feature=features/homePageFeature.feature --tags=@homepage --headless=true",
-    "test:plp": "node scripts/run-test.js --feature=features/plpFeature.feature --tags=@plp --headless=false",
-    "test:pdp": "node scripts/run-test.js --feature=features/pdpFeature.feature --tags=@pdp --headless=false",
-    "test:addtocart": "node scripts/run-test.js --feature=features/addToCartFeature.feature --tags=@addtocart --headless=false",
-    "test:checkout": "node scripts/run-test.js --feature=features/checkoutFeature.feature --tags=@checkout --headless=false"
-  },
+  "test:e2e": "node scripts/run-test-wrapper.js e2e",
+  "test:login": "node scripts/run-test-wrapper.js login",
+  "test:registration": "node scripts/run-test-wrapper.js registration",
+  "test:homepage": "node scripts/run-test-wrapper.js homepage",
+  "test:plp": "node scripts/run-test-wrapper.js plp",
+  "test:pdp": "node scripts/run-test-wrapper.js pdp",
+  "test:addtocart": "node scripts/run-test-wrapper.js addtocart",
+  "test:checkout": "node scripts/run-test-wrapper.js checkout",
+  "test:search": "node scripts/run-test-wrapper.js search",
+  "test:logout": "node scripts/run-test-wrapper.js logout"
+},
   "dependencies": {
-    "@cucumber/cucumber": "^12.3.0",
     "chai": "^5.1.0",
     "dotenv": "^17.2.3",
     "playwright": "^1.57.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "cross-env": "^10.1.0"
+    "@cucumber/cucumber": "^12.6.0",
+    "@playwright/test": "^1.58.0",
+    "allure-commandline": "^2.36.0",
+    "cross-env": "^10.1.0",
+    "multiple-cucumber-html-reporter": "^3.9.3"
   }
 }

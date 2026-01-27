@@ -2,6 +2,7 @@ const BasePage = require('./basePage');
 const { expect } = require('@playwright/test');
 const { PLPLocators } = require('../locators/plpLocators');
 const { testData } = require('../config/testData');
+const { settle } = require('../utils/dynamicWait');
 
 class ProductListingPage extends BasePage {
   constructor(page) {
@@ -87,19 +88,39 @@ class ProductListingPage extends BasePage {
         { selector: this.productTile, count: beforeCount },
         { timeout: testData.timeouts.huge }
       );
-
-      await this.page.waitForTimeout(500);
+      await settle(this.page, 200);
     } catch {
       console.warn('No additional products loaded');
     }
   }
 
   async openFirstAvailableSubCategory() {
+    const currentLocale = process.env.LOCALE || 'us';
+    const isUK = ['uk', 'eu'].includes(currentLocale);
+    
+    await this.page.evaluate(() => window.scrollTo(0, 0));
+    await settle(this.page, 300);
+    await this.closeModalIfPresent();
+    
+    if (isUK) {
+      await settle(this.page, 1000);
+    }
+
     const mainCategories = this.page.locator(this.mainCategoryLinks);
-    const mainCount = await mainCategories.count();
+    
+    let mainCount = 0;
+    for (let retry = 0; retry < 5; retry++) {
+      mainCount = await mainCategories.count();
+      if (mainCount > 0) break;
+      if (retry < 4) {
+        console.warn(`No main categories found, retry ${retry + 1}/5...`);
+        await settle(this.page, 800);
+        await this.closeModalIfPresent();
+      }
+    }
 
     if (mainCount === 0) {
-      throw new Error('No main categories found');
+      throw new Error('No main categories found after 5 retries. Page may not be fully loaded.');
     }
 
     for (let i = 0; i < mainCount; i++) {
@@ -109,8 +130,10 @@ class ProductListingPage extends BasePage {
       console.log(`Checking category ${i}: ${catText}`);
 
       await this.closeModalIfPresent();
+      await mainCat.scrollIntoViewIfNeeded();
+      await settle(this.page, 200);
       await this.hover(mainCat);
-      await this.page.waitForTimeout(1000);
+      await settle(this.page, isUK ? 600 : 400);
 
       const subCategories = this.page
         .locator(this.subCategoryLinks)
@@ -119,6 +142,9 @@ class ProductListingPage extends BasePage {
         .filter({
           has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
         });
+
+      await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      await settle(this.page, 300);
 
       const subCount = await subCategories.count();
       if (subCount > 0) {
@@ -158,6 +184,23 @@ class ProductListingPage extends BasePage {
     ]);
   }
 
+  async openRandomProduct() {
+    const products = this.page.locator(this.productTile);
+    const count = await products.count();
+
+    if (!count) {
+      throw new Error('No products found on PLP');
+    }
+
+    const randomIndex = Math.floor(Math.random() * count);
+    console.log(`Opening random product at index ${randomIndex} of ${count}`);
+
+    await Promise.all([
+      this.page.waitForURL(/\/p\//i),
+      products.nth(randomIndex).click()
+    ]);
+  }
+
   async openSubCategory(mainIndex = 0, subIndex = 0) {
     const mainCategories = this.page.locator(this.mainCategoryLinks);
     if (!(await mainCategories.count())) {
@@ -166,24 +209,55 @@ class ProductListingPage extends BasePage {
 
     const mainCat = mainCategories.nth(mainIndex);
     const mainText = (await mainCat.textContent()).trim();
-    console.log(`Hovering over main category: ${mainText}`);
+    const maxAttempts = 3;
 
-    await this.hover(mainCat);
+    const getSubCategories = () =>
+      this.page
+        .locator(this.subCategoryLinks)
+        .filter({ visible: true })
+        .filter({ hasNotText: testData.plp.subCategoryFilterIgnore })
+        .filter({
+          has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
+        });
 
-    const subCategories = this.page
-      .locator(this.subCategoryLinks)
-      .filter({ visible: true })
-      .filter({ hasNotText: testData.plp.subCategoryFilterIgnore })
-      .filter({
-        has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
-      });
+    const ensureNavReady = async () => {
+      await this.page.evaluate(() => window.scrollTo(0, 0));
+      await settle(this.page, 150);
+      await this.closeModalIfPresent();
+      await settle(this.page, 200);
+      await mainCat.scrollIntoViewIfNeeded();
+      await settle(this.page, 150);
+    };
 
-    await subCategories.first().waitFor({ state: 'visible', timeout: testData.timeouts.medium }).catch(() => { });
+    let subCount = 0;
+    let subCategories;
 
-    const subCount = await subCategories.count();
-    console.log(`Found ${subCount} visible subcategories`);
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`Hovering over main category: ${mainText} (attempt ${attempt}/${maxAttempts})`);
+      await ensureNavReady();
+      await this.hover(mainCat);
 
-    if (subIndex >= subCount && subCount > 0) {
+      await settle(this.page, 400);
+      subCategories = getSubCategories();
+      await subCategories.first().waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
+      await settle(this.page, 300);
+
+      subCount = await subCategories.count();
+      console.log(`Found ${subCount} visible subcategories`);
+
+      if (subCount > 0) break;
+
+      if (attempt < maxAttempts) {
+        console.warn(`No subcategories for "${mainText}". Retrying...`);
+        await settle(this.page, 400);
+      }
+    }
+
+    if (subCount === 0) {
+      throw new Error(`No visible subcategories found for "${mainText}" after ${maxAttempts} attempts. The menu may not have loaded properly.`);
+    }
+
+    if (subIndex >= subCount) {
       throw new Error(`Subcategory index ${subIndex} out of bounds`);
     }
 
@@ -198,8 +272,30 @@ class ProductListingPage extends BasePage {
   }
 
   async getNavigationStructure() {
+    const currentLocale = process.env.LOCALE || 'us';
+    const isUK = ['uk', 'eu'].includes(currentLocale);
+    
+    await this.page.evaluate(() => window.scrollTo(0, 0));
+    await settle(this.page, 300);
+    await this.closeModalIfPresent();
+    await settle(this.page, isUK ? 1000 : 300);
+
     const mainCategories = this.page.locator(this.mainCategoryLinks);
-    const mainCount = await mainCategories.count();
+    
+    let mainCount = 0;
+    for (let retry = 0; retry < 5; retry++) {
+      mainCount = await mainCategories.count();
+      if (mainCount > 0) break;
+      if (retry < 4) {
+        await settle(this.page, 800);
+        await this.closeModalIfPresent();
+      }
+    }
+
+    if (mainCount === 0) {
+      throw new Error('No main categories found for navigation structure');
+    }
+
     const structure = [];
 
     for (let i = 0; i < mainCount; i++) {
@@ -207,8 +303,10 @@ class ProductListingPage extends BasePage {
       const text = (await mainCat.textContent()).trim();
       if (!text) continue;
 
+      await mainCat.scrollIntoViewIfNeeded();
+      await settle(this.page, 200);
       await this.hover(mainCat);
-      await this.page.waitForTimeout(100);
+      await settle(this.page, isUK ? 500 : 300);
 
       const subCategories = this.page
         .locator(this.subCategoryLinks)
@@ -217,6 +315,9 @@ class ProductListingPage extends BasePage {
         .filter({
           has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
         });
+
+      await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      await settle(this.page, 200);
 
       structure.push({
         mainIndex: i,

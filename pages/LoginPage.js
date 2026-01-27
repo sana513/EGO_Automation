@@ -2,7 +2,7 @@ const BasePage = require("./basePage");
 const { LoginLocators } = require("../locators/loginLocators");
 const { testData } = require("../config/testData");
 
-class loginPage extends BasePage {
+class LoginPage extends BasePage {
   constructor(page) {
     super(page);
     this.page = page;
@@ -43,7 +43,7 @@ class loginPage extends BasePage {
     const currentLocale = process.env.LOCALE || 'us';
 
     if (['uk', 'eu'].includes(currentLocale)) {
-      console.log(`🔹 Locale is ${currentLocale}, waiting for cookie banner...`);
+      console.log(`Locale is ${currentLocale}, waiting for cookie banner...`);
       await this.page.waitForTimeout(3000);
       await this.handleCookieConsent(5000);
     } else {
@@ -68,4 +68,4 @@ class loginPage extends BasePage {
   }
 }
 
-module.exports = loginPage;
+module.exports = LoginPage;

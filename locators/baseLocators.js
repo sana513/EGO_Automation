@@ -8,7 +8,10 @@ const BaseLocators = {
             '.fb_lightbox button.close',
             '[class*="close-button"]',
             '.fb_lightbox-overlay',
-            '.preloaded_lightbox [aria-label="Close"]'
+            '.preloaded_lightbox [aria-label="Close"]',
+            '.newsletter-popup-close',
+            'button[id*="newsletter-close"]',
+            '[class*="newsletter"] [aria-label="Close"]'
         ],
         overlays: [
             '[id*="lightbox"]',

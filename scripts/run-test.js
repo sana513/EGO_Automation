@@ -6,6 +6,7 @@ let locale = 'us';
 let headless = 'true';
 let featureFile = '';
 let tags = '';
+let format = '';
 for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 
@@ -19,6 +20,8 @@ for (let i = 0; i < args.length; i++) {
         featureFile = arg.split('=')[1];
     } else if (arg.startsWith('--tags=')) {
         tags = arg.split('=')[1];
+    } else if (arg.startsWith('--format=')) {
+        format = arg.split('=')[1];
     }
 }
 
@@ -33,6 +36,10 @@ let command = `npx cross-env ENV=${env} LOCALE=${locale} HEADLESS=${headless} np
 
 if (tags) {
     command += ` --tags ${tags}`;
+}
+
+if (format) {
+    command += ` --format ${format}`;
 }
 
 try {

@@ -6,14 +6,17 @@ const BasePage = require('../../pages/basePage');
 Given('I open the website for {string}', async function (country) {
   this.basePage = new BasePage(this.page);
 
-  const useGlobalConfig = process.env.ENV || process.env.LOCALE;
-
-  if (useGlobalConfig) {
-    await this.basePage.navigate(this.basePage.getBaseUrl());
-  } else {
-    await this.basePage.navigate(this.basePage.getBaseUrl(country));
-  }
+  // Use LOCALE from environment if set, otherwise use the country parameter
+  const locale = process.env.LOCALE || country;
+  await this.basePage.navigate(this.basePage.getBaseUrl(locale));
 });
+
+Given('I open the website', async function () {
+  this.basePage = new BasePage(this.page);
+  const locale = process.env.LOCALE || 'us';
+  await this.basePage.navigate(this.basePage.getBaseUrl(locale));
+});
+
 
 Then('I should be successfully registered', async function () {
   const currentLocale = process.env.LOCALE || 'us';

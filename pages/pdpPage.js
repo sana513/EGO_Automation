@@ -2,7 +2,9 @@ const BasePage = require('./basePage');
 const { expect } = require('@playwright/test');
 const ProductListingPage = require('./plpPage');
 const { pdpLocators } = require('../locators/pdpLocators');
+const { AddToCartLocators } = require('../locators/addToCartLocators');
 const { testData } = require('../config/testData');
+const { waitForNetworkSettled, settle } = require('../utils/dynamicWait');
 
 class ProductDetailPage extends BasePage {
 
@@ -16,10 +18,21 @@ class ProductDetailPage extends BasePage {
     }
 
     async openRandomProductFromPLP() {
+        await this.ensureHomeAndReady();
+
         const plp = new ProductListingPage(this.page);
         await plp.openFirstAvailableSubCategory();
         await plp.loadMoreOnce();
-        await plp.openFirstProduct();
+        await plp.openRandomProduct();
+    }
+
+    async openProductFromPLPByIndex(index) {
+        await this.ensureHomeAndReady();
+
+        const plp = new ProductListingPage(this.page);
+        await plp.openFirstAvailableSubCategory();
+        await plp.loadMoreOnce();
+        await plp.openProductByIndex(index);
     }
 
     async selectAnyAvailableSize() {
@@ -66,12 +79,13 @@ class ProductDetailPage extends BasePage {
         const addBtn = this.page.locator(this.addToBagButton).first();
         await addBtn.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
         await addBtn.click();
-        await this.page.waitForTimeout(2000);
+        await waitForNetworkSettled(this.page, 5000);
+        await settle(this.page, 300);
     }
 
     async openCart() {
         await this.closeModalIfPresent();
-        await this.page.waitForTimeout(500);
+        await settle(this.page, 200);
 
         const cart = this.page.locator(this.cartIcon);
         await cart.waitFor({ state: 'visible', timeout: testData.timeouts.large });
@@ -82,7 +96,18 @@ class ProductDetailPage extends BasePage {
             await cart.click({ force: true });
         }
 
-        await this.page.waitForTimeout(1000);
+        const onCartPage = await Promise.race([
+            this.page.waitForURL(/\/cart/i, { timeout: testData.timeouts.medium }).then(() => true),
+            this.page.locator(AddToCartLocators.Update_quantity).first().waitFor({ state: 'visible', timeout: testData.timeouts.medium }).then(() => true)
+        ]).catch(() => false);
+
+        if (!onCartPage) {
+            const base = this.getBaseUrl().replace(/\/?$/, '');
+            const cartUrl = `${base}/cart`;
+            await this.page.goto(cartUrl, { waitUntil: 'domcontentloaded', timeout: testData.timeouts.medium }).catch(() => {});
+            await this.page.locator(AddToCartLocators.Update_quantity).first().waitFor({ state: 'visible', timeout: testData.timeouts.medium }).catch(() => {});
+        }
+        await settle(this.page, 200);
     }
 }
 
