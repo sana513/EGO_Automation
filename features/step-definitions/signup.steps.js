@@ -46,6 +46,25 @@ When("I select country and enter phone number", async function () {
   await signup.enterPhoneNumber(targetPhone);
 });
 
+When("I select country and enter phone number for registration", async function () {
+  const locale = testData.e2e?.registrationLocale || 'uk';
+  const { country, phone } = testData.registration.locales[locale] || testData.registration.locales.uk;
+  await signup.selectCountry(country);
+  await signup.enterPhoneNumber(phone);
+});
+
+When("I enter registration address details", async function () {
+  const locale = testData.e2e?.registrationLocale || 'uk';
+  const address = testData.registration.locales[locale]?.address || testData.registration.locales.uk.address;
+  const details = {
+    Street: address.street,
+    City: address.city,
+    "Post Code": address.postCode
+  };
+  if (address.state) details.State = address.state;
+  await signup.enterAddress(details);
+});
+
 When("I choose to enter address manually", async function () {
   await signup.chooseManualAddress();
 });
@@ -55,11 +74,18 @@ When("I enter address details", async function () {
   const localeData = testData.registration.locales[currentLocale]?.address;
 
   if (localeData) {
-    await signup.enterAddress({
+    const addressDetails = {
       Street: localeData.street,
       City: localeData.city,
       "Post Code": localeData.postCode
-    });
+    };
+
+    // Add state if it exists in locale data
+    if (localeData.state) {
+      addressDetails.State = localeData.state;
+    }
+
+    await signup.enterAddress(addressDetails);
   } else {
     throw new Error(`Address data not found for locale: ${currentLocale}`);
   }

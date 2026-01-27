@@ -1,6 +1,7 @@
 const BasePage = require("./basePage");
 const { SignupLocators } = require("../locators/signupLocators");
 const { testData } = require("../config/testData");
+const { settle } = require("../utils/dynamicWait");
 
 class SignupPage extends BasePage {
   constructor(page) {
@@ -32,6 +33,7 @@ class SignupPage extends BasePage {
     this.streetInput = this.activeForm.locator(this.sl.street);
     this.cityInput = this.activeForm.locator(this.sl.city);
     this.postCodeInput = this.activeForm.locator(this.sl.postCode);
+    this.stateInput = this.activeForm.locator(this.sl.state);
     this.addressLookupInput = this.activeForm.locator(this.sl.addressLookup);
     this.addressSuggestions = this.activeForm.locator(this.sl.addressSuggestions);
     this.submitButton = this.activeForm.locator(this.sl.submitButton);
@@ -49,16 +51,16 @@ class SignupPage extends BasePage {
     if (!this.page) throw new Error("Page is not initialized");
     await this.page.context().clearCookies();
     await this.page.evaluate(() => localStorage.clear());
+    global.cookieHandled = false;
 
     const currentLocale = process.env.LOCALE || 'us';
     await this.navigate(this.getBaseUrl(currentLocale));
 
     if (['uk', 'eu'].includes(currentLocale)) {
-      console.log(`🔹 Locale is ${currentLocale}, waiting for cookie banner...`);
-      await this.page.waitForTimeout(3000);
-      await this.handleCookieConsent(5000);
+      await this.handleCookieConsent(true);
+      await settle(this.page, 500);
     } else {
-      await this.handleCookieConsent(1000);
+      await this.handleCookieConsent(false);
     }
 
     await this.accountIcon.waitFor({ state: "visible", timeout: testData.timeouts.medium });
@@ -154,6 +156,13 @@ class SignupPage extends BasePage {
     if (details["Street"]) await this.streetInput.fill(details["Street"]);
     if (details["City"]) await this.cityInput.fill(details["City"]);
     if (details["Post Code"]) await this.postCodeInput.fill(details["Post Code"]);
+
+    if (details["State"]) {
+      const stateVisible = await this.stateInput.isVisible().catch(() => false);
+      if (stateVisible) {
+        await this.stateInput.selectOption({ label: details["State"] });
+      }
+    }
   }
 
   async addressLookup(postCode) {
@@ -176,8 +185,42 @@ class SignupPage extends BasePage {
 
   async submitForm() {
     if (!this.activeForm) await this.setActiveForm();
+
+    const errorElements = await this.page.locator('.error, [class*="error"], [class*="invalid"]').all();
+    if (errorElements.length > 0) {
+      const errorTexts = await Promise.all(errorElements.map(async (el) => {
+        const text = await el.textContent().catch(() => '');
+        const isVisible = await el.isVisible().catch(() => false);
+        return isVisible ? text : null;
+      }));
+      const visibleErrors = errorTexts.filter(t => t);
+      if (visibleErrors.length > 0) {
+        console.log('Validation errors found before submission:', visibleErrors);
+      }
+    }
+
     await this.submitButton.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
     await this.submitButton.click();
+
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+    await settle(this.page, 300);
+
+    const currentUrl = this.page.url();
+    if (currentUrl.includes('/signup')) {
+      const postSubmitErrors = await this.page.locator('.error, [class*="error"], [class*="invalid"]').all();
+      if (postSubmitErrors.length > 0) {
+        const errorTexts = await Promise.all(postSubmitErrors.map(async (el) => {
+          const text = await el.textContent().catch(() => '');
+          const isVisible = await el.isVisible().catch(() => false);
+          return isVisible ? text : null;
+        }));
+        const visibleErrors = errorTexts.filter(t => t);
+        if (visibleErrors.length > 0) {
+          console.log('Form submission failed with validation errors:', visibleErrors);
+          throw new Error(`Form validation failed: ${visibleErrors.join(', ')}`);
+        }
+      }
+    }
   }
 }
 

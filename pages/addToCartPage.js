@@ -45,7 +45,7 @@ class AddToCartPage extends basePage {
   }
 
   async updateSizeRandomly() {
-    console.log("🔹 Starting cart size update...");
+    console.log("Starting cart size update...");
 
     const sizeSelects = this.page.locator(this.updateSize);
     const count = await sizeSelects.count();

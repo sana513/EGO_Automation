@@ -11,6 +11,7 @@ const SignupLocators = {
         street: 'input[placeholder="Street Name"]',
         city: 'input[placeholder="City"]',
         postCode: 'input[placeholder="Post Code"]',
+        state: 'select[data-testid="state-select"]',
         addressLookup: 'input[placeholder="Start typing your address..."]',
         dob: {
             day: 'select[data-testid="select-input"]:nth-child(0)',

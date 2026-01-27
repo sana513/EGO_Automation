@@ -1,12 +1,12 @@
 
 Feature: Homepage Feature
 Background:
-    Given I open the website for "us"
+    Given I open the website
 @homepage 
   Scenario: Verify homepage sections and add product from What's Hot
 
     # Entry point: Open homepage
-    Given I open the homepage for "us"
+    Given I open the homepage
     Then I should see the hero banner
 
     # Validate product category grid

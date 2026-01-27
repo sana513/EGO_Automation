@@ -1,6 +1,5 @@
-// features/support/world.js
-const { setWorldConstructor, BeforeAll, AfterAll, Before, After, setDefaultTimeout } = require("@cucumber/cucumber");
-const { webkit } = require("playwright");
+const { setWorldConstructor, BeforeAll, AfterAll, Before, setDefaultTimeout } = require("@cucumber/cucumber");
+const playwright = require("playwright");
 const { getConfig, logConfig } = require("../../config/config");
 
 setDefaultTimeout(3600000);
@@ -12,6 +11,16 @@ class CustomWorld {
     this.page = null;
     this.config = getConfig();
   }
+
+  get cookieHandled() { return global.cookieHandled; }
+  set cookieHandled(val) { global.cookieHandled = val; }
+
+  async attachScreenshot(name = "screenshot") {
+    if (this.page && this.attach) {
+      const screenshot = await this.page.screenshot({ fullPage: true });
+      await this.attach(screenshot, "image/png");
+    }
+  }
 }
 
 setWorldConstructor(CustomWorld);
@@ -22,10 +31,17 @@ let page;
 
 BeforeAll(async function () {
   logConfig();
-  const headless = process.env.HEADLESS === 'true';
+  const headless = process.env.HEADLESS === "true";
+  global.cookieHandled = false;
 
-  browser = await webkit.launch({ headless: headless, slowMo: 100 });
-  context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+  const browserName = process.env.BROWSER || "webkit";
+  const launch = playwright[browserName] || playwright.webkit;
+  browser = await launch.launch({ headless: headless, slowMo: 100 });
+  context = await browser.newContext({
+    viewport: { width: 1920, height: 1080 },
+    recordVideo: { dir: "reports/videos/" },
+    recordTrace: "retain-on-failure"
+  });
   page = await context.newPage();
 });
 
@@ -39,7 +55,4 @@ Before(function () {
   this.browser = browser;
   this.context = context;
   this.page = page;
-});
-
-After(function () {
 });

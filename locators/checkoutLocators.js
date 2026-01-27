@@ -19,7 +19,16 @@ const CheckoutLocators = {
         cardExpiryInput: '#card-expiry',
         cardCvcInput: '#card-cvc',
         cardNameInput: '#card-name',
-        payNowButton: '#checkout-payment-continue'
+        payNowButton: '#checkout-payment-continue',
+        methods: {
+            card: 'button:has-text("Card")',
+            paypal: 'button:has-text("PayPal")',
+            klarna: 'button:has-text("Klarna")',
+            testprovider: 'button:has-text("Test Provider")',
+            bank: 'button:has-text("Bank Transfer")',
+            afterpay: 'button:has-text("Afterpay")',
+            clearpay: 'button:has-text("Clearpay")'
+        }
     }
 };
 
