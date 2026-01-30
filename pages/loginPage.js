@@ -42,24 +42,24 @@ class loginPage extends BasePage {
   async openLoginModal() {
     const currentLocale = process.env.LOCALE || 'us';
 
-    if (['uk', 'eu'].includes(currentLocale)) {
+    if (['uk', 'eu', 'au'].includes(currentLocale)) {
       console.log(`Locale is ${currentLocale}, waiting for cookie banner...`);
       await this.page.waitForTimeout(3000);
-      await this.handleCookieConsent(5000);
+      await this.handleCookieConsent(true);
     } else {
-      await this.handleCookieConsent(1000);
+      await this.handleCookieConsent(false);
     }
 
     await this.closeModalIfPresent();
     await this.accountIcon.first().click({ force: true });
-    await this.emailInput.waitFor({ state: "visible", timeout: testData.timeouts.xlarge });
+    await this.emailInput.first().waitFor({ state: "visible", timeout: testData.timeouts.xlarge });
   }
 
   async performLogin(email = testData.login.email, password = testData.login.password) {
     console.log(`Performing login with: ${email}`);
-    await this.emailInput.fill(email);
-    await this.passwordInput.fill(password);
-    await this.submitButton.click();
+    await this.emailInput.first().fill(email);
+    await this.passwordInput.first().fill(password);
+    await this.submitButton.first().click();
     await this.page.waitForURL("**/my-account/**", { timeout: testData.timeouts.huge });
   }
 

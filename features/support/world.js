@@ -1,4 +1,4 @@
-const { setWorldConstructor, BeforeAll, AfterAll, Before, setDefaultTimeout } = require("@cucumber/cucumber");
+const { setWorldConstructor, BeforeAll, AfterAll, Before, After, setDefaultTimeout } = require("@cucumber/cucumber");
 const playwright = require("playwright");
 const { getConfig, logConfig } = require("../../config/config");
 
@@ -10,10 +10,11 @@ class CustomWorld {
     this.context = null;
     this.page = null;
     this.config = getConfig();
+    this._cookieHandled = false;
   }
 
-  get cookieHandled() { return global.cookieHandled; }
-  set cookieHandled(val) { global.cookieHandled = val; }
+  get cookieHandled() { return this._cookieHandled; }
+  set cookieHandled(val) { this._cookieHandled = val; }
 
   async attachScreenshot(name = "screenshot") {
     if (this.page && this.attach) {
@@ -26,33 +27,34 @@ class CustomWorld {
 setWorldConstructor(CustomWorld);
 
 let browser;
-let context;
-let page;
 
 BeforeAll(async function () {
   logConfig();
   const headless = process.env.HEADLESS === "true";
-  global.cookieHandled = false;
 
   const browserName = process.env.BROWSER || "webkit";
   const launch = playwright[browserName] || playwright.webkit;
   browser = await launch.launch({ headless: headless, slowMo: 100 });
-  context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 },
-    recordVideo: { dir: "reports/videos/" },
-    recordTrace: "retain-on-failure"
-  });
-  page = await context.newPage();
 });
 
 AfterAll(async function () {
-  await page?.close();
-  await context?.close();
   await browser?.close();
 });
 
-Before(function () {
+Before(async function () {
   this.browser = browser;
-  this.context = context;
-  this.page = page;
+  let viewport = { width: 1440, height: 900 };
+  if (process.env.DISPLAY === "U2419H") {
+    viewport = { width: 1920, height: 1080 };
+  }
+
+  this.context = await browser.newContext({
+    viewport: viewport,
+    recordVideo: { dir: "reports/videos/" },
+    recordTrace: "retain-on-failure"
+  });
+
+  this.page = await this.context.newPage();
 });
+
+

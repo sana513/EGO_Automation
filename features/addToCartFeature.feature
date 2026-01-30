@@ -1,9 +1,9 @@
 Feature: Add To Cart Feature
 Background:
-    Given I open the website for "us"
+    Given I open the website
 @addtocart
 Scenario: Update cart and proceed to checkout
-  Given I open the website for "us"
+  Given I open the website
   And I open a random product from PLP
   When I select any available size
   And I add the product to the bag

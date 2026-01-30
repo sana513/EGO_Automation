@@ -24,7 +24,7 @@ class BasePage {
   async closeModalIfPresent(isInitial = false) {
     const url = this.page.url();
     const isUK = /\/(uk|eu)|\.co\.uk/.test(url);
-    
+
     if (isUK && (isInitial || !global.cookieHandled)) {
       await this.handleCookieConsent(isInitial);
     } else if (isUK) {
@@ -51,24 +51,24 @@ class BasePage {
     try {
       const url = this.page.url();
       const isUK = /\/(uk|eu)|\.co\.uk/.test(url);
-      
+
       if (!isUK) {
         global.cookieHandled = true;
         return;
       }
 
       const consentGiven = await this.page.evaluate(() => {
-        if (localStorage.getItem('CookieConsent') || 
-            localStorage.getItem('cookiebot-consent') ||
-            localStorage.getItem('cookieconsent_status')) {
+        if (localStorage.getItem('CookieConsent') ||
+          localStorage.getItem('cookiebot-consent') ||
+          localStorage.getItem('cookieconsent_status')) {
           return true;
         }
         const cookies = document.cookie.split(';');
         for (const cookie of cookies) {
           const [name] = cookie.trim().split('=');
-          if (name.includes('CookieConsent') || 
-              name.includes('cookiebot') ||
-              name.includes('cookieconsent')) {
+          if (name.includes('CookieConsent') ||
+            name.includes('cookiebot') ||
+            name.includes('cookieconsent')) {
             return true;
           }
         }
@@ -96,14 +96,14 @@ class BasePage {
         if (await btn.isVisible({ timeout }).catch(() => false)) {
           await btn.click({ force: true }).catch(() => { });
           await settle(this.page, 800);
-          
+
           await this.page.waitForFunction(() => {
-            return localStorage.getItem('CookieConsent') || 
-                   localStorage.getItem('cookiebot-consent') ||
-                   document.cookie.includes('CookieConsent') ||
-                   document.cookie.includes('cookiebot');
-          }, { timeout: 5000 }).catch(() => {});
-          
+            return localStorage.getItem('CookieConsent') ||
+              localStorage.getItem('cookiebot-consent') ||
+              document.cookie.includes('CookieConsent') ||
+              document.cookie.includes('cookiebot');
+          }, { timeout: 5000 }).catch(() => { });
+
           await this.page.waitForLoadState('load', { timeout: 10000 }).catch(() => { });
           accepted = true;
           break;
@@ -126,29 +126,29 @@ class BasePage {
         await underlay.evaluate(el => el.remove()).catch(() => { });
       }
     } catch (e) {
-      await this.hideOverlays(BaseLocators.cookieConsent.overlays).catch(() => {});
+      await this.hideOverlays(BaseLocators.cookieConsent.overlays).catch(() => { });
     }
   }
 
   async ensureHomeAndReady(locale = null) {
     const currentLocale = locale || process.env.LOCALE || 'us';
     const isUK = ['uk', 'eu'].includes(currentLocale);
-    
+
     await this.navigate(this.getBaseUrl(currentLocale));
-    
+
     if (isUK) {
       await this.handleCookieConsent(true);
-      await this.page.waitForLoadState('load', { timeout: 15000 }).catch(() => {});
+      await this.page.waitForLoadState('load', { timeout: 15000 }).catch(() => { });
       await settle(this.page, 1000);
     }
-    
+
     await waitForNetworkSettled(this.page, isUK ? 15000 : 10000);
     await this.closeModalIfPresent();
-    
+
     if (isUK) {
       await settle(this.page, 500);
     }
-    
+
     await this.page.evaluate(() => window.scrollTo(0, 0));
   }
 

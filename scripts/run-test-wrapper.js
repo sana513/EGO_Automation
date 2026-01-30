@@ -6,7 +6,8 @@ const additionalArgs = args.slice(1);
 
 const testConfigs = {
   e2e: {
-    feature: 'features/egoFeature.feature',
+    // Use consolidated E2E feature file
+    feature: 'features/e2eFeature.feature',
     tags: '@e2e'
   },
   login: {

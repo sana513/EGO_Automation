@@ -115,6 +115,19 @@ class SearchPage extends BasePage {
     await this.page.waitForLoadState("domcontentloaded");
   }
 
+  async openProductFromResultByIndex(index = 0) {
+    const results = this.page.locator(SearchLocators.productResultItems);
+    await results.first().waitFor({ state: "visible", timeout: testData.timeouts.large });
+    const count = await results.count();
+    if (index >= count) index = count - 1;
+    if (count === 0) throw new Error("No search results found to open");
+
+    await Promise.all([
+      this.page.waitForURL(/\/p\//i, { timeout: testData.timeouts.large }),
+      results.nth(index).click()
+    ]);
+  }
+
   async clearSearchInput() {
     const input = this.page.locator(SearchLocators.searchInput).first();
     await this.fill(input, "");
@@ -154,18 +167,18 @@ class SearchPage extends BasePage {
     const locale = process.env.LOCALE || 'us';
     const expectedBase = this.getBaseUrl(locale);
     const baseDomain = expectedBase.replace('https://', '').split('/')[0];
-    
+
     // Only navigate if we're not already on the homepage
     // Check if URL contains the base domain and is not on a sub-page
-    const isOnHomepage = currentUrl.includes(baseDomain) && 
-                        !currentUrl.includes('/c/') && 
-                        !currentUrl.includes('/p/') &&
-                        !currentUrl.includes('/cart') &&
-                        !currentUrl.includes('/checkout') &&
-                        !currentUrl.includes('/my-account') &&
-                        !currentUrl.includes('/search') &&
-                        (currentUrl === expectedBase || currentUrl === expectedBase + '/');
-    
+    const isOnHomepage = currentUrl.includes(baseDomain) &&
+      !currentUrl.includes('/c/') &&
+      !currentUrl.includes('/p/') &&
+      !currentUrl.includes('/cart') &&
+      !currentUrl.includes('/checkout') &&
+      !currentUrl.includes('/my-account') &&
+      !currentUrl.includes('/search') &&
+      (currentUrl === expectedBase || currentUrl === expectedBase + '/');
+
     if (!isOnHomepage) {
       await super.ensureHomeAndReady(locale);
     } else {

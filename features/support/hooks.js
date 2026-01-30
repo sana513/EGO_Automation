@@ -25,5 +25,8 @@ After(async function (scenario) {
     if (this.attach) await this.attach(screenshot, "image/png");
   } catch (e) {
     console.warn("Could not save failure screenshot:", e.message);
+  } finally {
+    await this.page?.close().catch(() => { });
+    await this.context?.close().catch(() => { });
   }
 });

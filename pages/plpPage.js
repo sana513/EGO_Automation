@@ -97,17 +97,17 @@ class ProductListingPage extends BasePage {
   async openFirstAvailableSubCategory() {
     const currentLocale = process.env.LOCALE || 'us';
     const isUK = ['uk', 'eu'].includes(currentLocale);
-    
+
     await this.page.evaluate(() => window.scrollTo(0, 0));
     await settle(this.page, 300);
     await this.closeModalIfPresent();
-    
+
     if (isUK) {
       await settle(this.page, 1000);
     }
 
     const mainCategories = this.page.locator(this.mainCategoryLinks);
-    
+
     let mainCount = 0;
     for (let retry = 0; retry < 5; retry++) {
       mainCount = await mainCategories.count();
@@ -123,7 +123,10 @@ class ProductListingPage extends BasePage {
       throw new Error('No main categories found after 5 retries. Page may not be fully loaded.');
     }
 
-    for (let i = 0; i < mainCount; i++) {
+    const mainIndices = Array.from({ length: mainCount }, (_, i) => i);
+    const shuffledMainIndices = mainIndices.sort(() => Math.random() - 0.5);
+
+    for (const i of shuffledMainIndices) {
       const mainCat = mainCategories.nth(i);
       const catText = await mainCat.textContent().catch(() => '');
 
@@ -143,13 +146,18 @@ class ProductListingPage extends BasePage {
           has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
         });
 
-      await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => { });
       await settle(this.page, 300);
 
       const subCount = await subCategories.count();
       if (subCount > 0) {
-        console.log(`Found ${subCount} subcategories in "${catText}"`);
-        await subCategories.first().click({ force: true });
+        const randomSubIndex = Math.floor(Math.random() * subCount);
+        const subCat = subCategories.nth(randomSubIndex);
+        const subText = await subCat.textContent().catch(() => 'Unknown');
+
+        console.log(`Found ${subCount} subcategories in "${catText}". Picking random: "${subText.trim()}" at index ${randomSubIndex}`);
+
+        await subCat.click({ force: true });
         await this.waitForPLP();
         return; 
       }
@@ -239,7 +247,7 @@ class ProductListingPage extends BasePage {
 
       await settle(this.page, 400);
       subCategories = getSubCategories();
-      await subCategories.first().waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
+      await subCategories.first().waitFor({ state: 'visible', timeout: 3000 }).catch(() => { });
       await settle(this.page, 300);
 
       subCount = await subCategories.count();
@@ -274,14 +282,14 @@ class ProductListingPage extends BasePage {
   async getNavigationStructure() {
     const currentLocale = process.env.LOCALE || 'us';
     const isUK = ['uk', 'eu'].includes(currentLocale);
-    
+
     await this.page.evaluate(() => window.scrollTo(0, 0));
     await settle(this.page, 300);
     await this.closeModalIfPresent();
     await settle(this.page, isUK ? 1000 : 300);
 
     const mainCategories = this.page.locator(this.mainCategoryLinks);
-    
+
     let mainCount = 0;
     for (let retry = 0; retry < 5; retry++) {
       mainCount = await mainCategories.count();
@@ -316,7 +324,7 @@ class ProductListingPage extends BasePage {
           has: this.page.locator('xpath=self::*[contains(@href, "/c/")]')
         });
 
-      await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      await subCategories.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => { });
       await settle(this.page, 200);
 
       structure.push({

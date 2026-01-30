@@ -10,6 +10,7 @@ const testData = {
     },
     checkout: {
         email: process.env.CHECKOUT_EMAIL || "sana.zafar@rltsquare.com",
+        password: process.env.TEST_USER_PASSWORD || "Sana@321",
         shipping: {
             firstName: "John",
             lastName: "Doe",
@@ -47,7 +48,67 @@ const testData = {
             'a:has-text("Enter address manually")',
             'span:has-text("Enter address manually")',
             'text=Or Enter Your Address Manually'
-        ]
+        ],
+        stateMappings: {
+            US: {
+                'NY': 'New York',
+                'CA': 'California',
+                'TX': 'Texas',
+                'FL': 'Florida',
+                'IL': 'Illinois'
+            },
+            AU: {
+                'NSW': 'New South Wales',
+                'VIC': 'Victoria',
+                'QLD': 'Queensland',
+                'WA': 'Western Australia',
+                'SA': 'South Australia',
+                'TAS': 'Tasmania',
+                'ACT': 'Australian Capital Territory',
+                'NT': 'Northern Territory'
+            }
+        },
+        labels: {
+            continue: "Continue",
+            continueUpper: "CONTINUE",
+            payNow: "Pay Now",
+            signIn: "Sign in",
+            inputLabels: {
+                firstName: "First Name",
+                lastName: "Last Name",
+                address1: "Address Line 1",
+                address2: "Address Line 2",
+                city: "City",
+                postCode: "Post Code",
+                country: "Country",
+                phone: "Phone Number",
+                cardNumber: "Card Number",
+                expiryDate: "Expiry Date",
+                cvc: "CVC"
+            }
+        },
+        selectors: {
+            continueButton: "#checkout-shipping-continue"
+        },
+        stripeInputNames: {
+            cardNumber: "cardnumber",
+            expDate: "exp-date",
+            cvc: "cvc"
+        },
+        confirmationUrlPattern: "order-confirmation|thank-you|success",
+        retries: {
+            shippingContinue: 5,
+            continueToPayment: 5
+        },
+        settleMs: {
+            afterEmail: 200,
+            afterSignIn: 500,
+            afterContinue: 300,
+            afterProvince: 1500,
+            afterShippingMethod: 2000,
+            shippingContinueWait: 3000,
+            buttonPollInterval: 2000
+        }
     },
     plp: {
         productLimit: 40,
@@ -87,7 +148,8 @@ const testData = {
                     street: "Longford Trading Estate",
                     city: "Manchester",
                     postCode: "M32 0JT"
-                }
+                },
+                countryCode: "GB"
             },
             eu: {
                 country: "Ireland",
@@ -96,7 +158,8 @@ const testData = {
                     street: "123 Dublin St",
                     city: "Dublin",
                     postCode: "D01 A1B2"
-                }
+                },
+                countryCode: "IE"
             },
             us: {
                 country: "United States",
@@ -105,7 +168,8 @@ const testData = {
                     street: "123 New York St",
                     city: "New York",
                     postCode: "10001"
-                }
+                },
+                countryCode: "US"
             },
             ae: {
                 country: "United Arab Emirates",
@@ -114,7 +178,8 @@ const testData = {
                     street: "Sheikh Zayed Road",
                     city: "Dubai",
                     postCode: "00000"
-                }
+                },
+                countryCode: "AE"
             },
             ca: {
                 country: "Canada",
@@ -124,7 +189,8 @@ const testData = {
                     city: "Toronto",
                     postCode: "M5B 1M4",
                     state: "Ontario"
-                }
+                },
+                countryCode: "CA"
             },
             au: {
                 country: "Australia",
@@ -133,8 +199,9 @@ const testData = {
                     street: "123 George Street",
                     city: "Sydney",
                     postCode: "2000",
-                    state: "New South Wales"
-                }
+                    state: "NSW"
+                },
+                countryCode: "AU"
             }
         }
     },
@@ -166,7 +233,8 @@ const testData = {
             partial: "dres",
             suggestionTrigger: "dress",
             oos: "sold out",
-            trending: "Trending"
+            trending: "Trending",
+            randomKeywords: ["dress", "tops", "shoes", "boots", "heels", "sandals", "accessories", "jewelry", "bikini", "skirt"]
         },
         placeholder: "Search...",
         noResultsMessage: "Products Matching|0 STYLES",

@@ -4,6 +4,8 @@ const pdpLocators = {
     cartIcon: '[id="Bag icon_2"]',
     sizeOptions: 'ul.select-options li',
     sizeSpan: 'span',
+    miniCartDrawer: '[data-testid="drawer"]',
+    miniCartCloseButton: '[data-testid="drawer"] #Capa_1, [data-testid="drawer"] [aria-label="Close"]',
 };
 
 module.exports = { pdpLocators };

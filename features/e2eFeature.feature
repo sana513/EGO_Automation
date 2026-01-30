@@ -1,7 +1,7 @@
 Feature: Full E-commerce End-to-End Flow
 
   Background:
-    Given I open the website for "us"
+    Given I open the website
 
   @registration @e2e
   Scenario: Complete manual address registration
@@ -21,6 +21,14 @@ Feature: Full E-commerce End-to-End Flow
   Scenario: Login to my account
     When I perform login with valid credentials
     Then I should be redirected to my account dashboard
+    
+  @logout @e2e
+  Scenario: Complete flow with login and logout
+    Given I am logged in
+    And I navigate to my account page
+    When I logout from my account
+    Then I should be logged out
+    And I should be redirected to the homepage
 
   @homepage @e2e
   Scenario: Verify homepage sections and add product from What's Hot

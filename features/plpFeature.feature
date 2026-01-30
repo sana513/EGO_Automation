@@ -1,6 +1,6 @@
 Feature: PLP Feature
 Background:
-    Given I open the website for "us"
+    Given I open the website
  @plp 
 Scenario: Verify products on PLP
   Given I open the PLP page

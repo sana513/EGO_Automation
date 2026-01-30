@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
+  "test:e2espec": "playwright test tests/e2etest.spec.js",
   "test:e2e": "node scripts/run-test-wrapper.js e2e",
   "test:login": "node scripts/run-test-wrapper.js login",
   "test:registration": "node scripts/run-test-wrapper.js registration",

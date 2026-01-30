@@ -6,6 +6,11 @@ Given('I open a random product from PLP', async function () {
   await this.addToCart.openRandomProduct();
 });
 
+Given('I open a random product from search', async function () {
+  this.addToCart = new AddToCartPage(this.page);
+  await this.addToCart.openRandomProductFromSearch();
+});
+
 When('I select any available size', async function () {
   if (!this.addToCart) this.addToCart = new AddToCartPage(this.page);
   await this.addToCart.pdp.selectAnyAvailableSize();
