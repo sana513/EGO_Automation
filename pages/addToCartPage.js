@@ -22,6 +22,10 @@ class AddToCartPage extends basePage {
     await this.pdp.openRandomProductFromPLP();
   }
 
+  async openRandomProductFromSearch(keyword) {
+    await this.pdp.openRandomProductFromSearch(keyword);
+  }
+
   async selectSizeAndAddToBag() {
     await this.pdp.selectAnyAvailableSize();
     await this.pdp.addToBag();

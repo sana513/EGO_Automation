@@ -5,14 +5,12 @@ const { testData } = require("../../config/testData");
 Given("I open the homepage for {string}", async function (country) {
   this.homePage = new HomePage(this.page);
 
-  // Use LOCALE from environment if set, otherwise use the country parameter
   const locale = process.env.LOCALE || country;
   await this.homePage.open(locale);
 });
 
 Given("I open the homepage", async function () {
   this.homePage = new HomePage(this.page);
-  // Use LOCALE from environment if set, otherwise default to 'us'
   const locale = process.env.LOCALE || 'us';
   await this.homePage.open(locale);
 });

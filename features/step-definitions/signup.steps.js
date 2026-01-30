@@ -80,7 +80,6 @@ When("I enter address details", async function () {
       "Post Code": localeData.postCode
     };
 
-    // Add state if it exists in locale data
     if (localeData.state) {
       addressDetails.State = localeData.state;
     }
