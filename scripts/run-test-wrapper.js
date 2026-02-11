@@ -6,7 +6,6 @@ const additionalArgs = args.slice(1);
 
 const testConfigs = {
   e2e: {
-    // Use consolidated E2E feature file
     feature: 'features/e2eFeature.feature',
     tags: '@e2e'
   },
@@ -14,9 +13,9 @@ const testConfigs = {
     feature: 'features/loginFeature.feature',
     tags: '@login'
   },
-  registration: {
+  signup: {
     feature: 'features/signupFeature.feature',
-    tags: '@registration'
+    tags: '@signup'
   },
   homepage: {
     feature: 'features/homePageFeature.feature',
@@ -45,6 +44,10 @@ const testConfigs = {
   logout: {
     feature: 'features/logoutFeature.feature',
     tags: '@logout'
+  },
+  fulljourney: {
+    feature: 'features/e2e.feature',
+    tags: '@full_journey'
   }
 };
 
@@ -54,9 +57,35 @@ if (!config) {
   process.exit(1);
 }
 
-let command = `node scripts/run-test.js --feature=${config.feature} --tags=${config.tags} --headless=false --format json:reports/cucumber-report.json`;
-if (additionalArgs.length > 0) {
-  command += ' ' + additionalArgs.join(' ');
+// Check if additional args contain tags
+let finalTags = config.tags;
+let otherArgs = [];
+
+for (let i = 0; i < additionalArgs.length; i++) {
+  const arg = additionalArgs[i];
+  if (arg.startsWith('--tags')) {
+    let additionalTag;
+    if (arg.includes('=')) {
+      additionalTag = arg.split('=')[1].replace(/['"]/g, '');
+    } else {
+      additionalTag = additionalArgs[i + 1];
+      if (additionalTag) {
+        additionalTag = additionalTag.replace(/['"]/g, '');
+        i++; // Skip next arg since we used it
+      }
+    }
+    if (additionalTag && !additionalTag.startsWith('--')) {
+      // Combine tags with AND logic
+      finalTags = `"${config.tags} and ${additionalTag}"`;
+    }
+  } else {
+    otherArgs.push(arg);
+  }
+}
+
+let command = `node scripts/run-test.js --feature=${config.feature} --tags=${finalTags} --headless=false --format json:reports/cucumber-report.json`;
+if (otherArgs.length > 0) {
+  command += ' ' + otherArgs.join(' ');
 }
 
 let testExitCode = 0;
@@ -66,22 +95,18 @@ try {
     shell: true
   });
 } catch (error) {
-  // Tests failed, but we still want to generate the report
   testExitCode = error.status || 1;
-  console.log('\n⚠️  Tests completed with failures. Generating report...\n');
+  console.log('\nTests completed with failures. Generating report...\n');
 }
 
-// Always generate report, even if tests failed
 try {
   execSync('node scripts/generate-report.js', {
     stdio: 'inherit',
     shell: true
   });
-  console.log('\n✅ Report generated successfully!\n');
+  console.log('\nReport generated successfully!\n');
 } catch (error) {
-  console.error('\n❌ Failed to generate report:', error.message);
-  // Don't exit here - we want to preserve the test exit code
+  console.error('\nFailed to generate report:', error.message);
 }
 
-// Exit with the test exit code (0 for success, non-zero for failure)
 process.exit(testExitCode);

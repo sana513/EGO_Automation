@@ -1,7 +1,7 @@
 Feature: Registration Feature
 Background:
     Given I open the website for "us"   
-@registration 
+@signup 
   Scenario: Complete manual address registration
     Given I navigate to the registration page
     When I enter a unique email for registration
