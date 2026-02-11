@@ -1,258 +1,288 @@
+// ==============================
+// ENV + GLOBAL CONSTANTS
+// ==============================
+
+const ENV = {
+  CHECKOUT_EMAIL: process.env.CHECKOUT_EMAIL || "sana.zafar@rltsquare.com",
+  CHECKOUT_PASSWORD: process.env.CHECKOUT_PASSWORD || "Sana@321",
+  TEST_USER_EMAIL: process.env.TEST_USER_EMAIL || "naveed.chughtai@rltsquare.com",
+  TEST_USER_PASSWORD: process.env.TEST_USER_PASSWORD || "Rlt@20250101",
+  COUPON_CODE: process.env.COUPON_CODE || "R5D48EF48",
+  PAYMENT_CARD_NUMBER: process.env.PAYMENT_CARD_NUMBER || "4242424242424242",
+  PAYMENT_CVC: process.env.PAYMENT_CVC || "123"
+};
+
+const DEFAULT_USER = {
+  firstName: "John",
+  lastName: "Doe"
+};
+
+const DEFAULT_ADDRESS_US = {
+  street: "123 Main Street",
+  city: "New York",
+  postCode: "10001",
+  state: "NY",
+  provinceCode: "NY",
+  countryCode: "US"
+};
+
+// ==============================
+// TIMEOUTS
+// ==============================
+
+const timeouts = {
+  small: 2000,
+  medium: 5000,
+  large: 15000,
+  xlarge: 25000,
+  huge: 30000,
+  extreme: 45000
+};
+
+// ==============================
+// SEARCH
+// ==============================
+
+const search = {
+  keywords: {
+    valid: "dress",
+    invalid: "nonexistentproductxyz",
+    partial: "dres",
+    suggestionTrigger: "dress",
+    oos: "sold out",
+    trending: "Trending",
+    randomKeywords: [
+      "dress", "tops", "shoes", "boots", "heels",
+      "sandals", "accessories", "jewelry", "bikini", "skirt"
+    ]
+  },
+  placeholder: "Search...",
+  noResultsMessage: "Products Matching|0 STYLES",
+  trendingHeader: "Trending Categories|Trending",
+  outOfStockPattern: "Sold Out|Out of Stock"
+};
+
+// ==============================
+// TEST DATA
+// ==============================
+
 const testData = {
-    e2e: {
-        registrationLocale: "uk",
-        checkoutEmail: process.env.CHECKOUT_EMAIL || "sana.zafar@rltsquare.com",
-        couponCode: process.env.COUPON_CODE || "R5D48EF48"
+  e2e: {
+    registrationLocale: "uk",
+    checkoutEmail: ENV.CHECKOUT_EMAIL,
+    couponCode: ENV.COUPON_CODE
+  },
+
+  login: {
+    email: ENV.TEST_USER_EMAIL,
+    password: ENV.TEST_USER_PASSWORD
+  },
+
+  checkout: {
+    email: ENV.CHECKOUT_EMAIL,
+    password: ENV.CHECKOUT_PASSWORD,
+    defaultLocale: "us",
+
+    waitTimes: {
+      networkIdle: 20000,
+      emailEntry: 3000,
+      shippingFormLoad: 2000,
+      manualAddressExpand: 2000,
+      fieldBlur: 1000,
+      countryChange: 3000,
+      provinceStabilize: 4000,
+      provinceOptionsLoad: 2000,
+      provinceDropdownClick: 2000,
+      provinceSelection: 2500,
+      provinceInputFill: 1500,
+      shippingContinue: 2000,
+      shippingMethodLoad: 3000,
+      shippingMethodSelection: 1500,
+      paymentStepLoad: 3000,
+      paymentFormLoad: 5000,
+      modalClose: 1000,
+      signIn: 5000,
+      passwordEntry: 3000,
+      authentication: 15000,
+      addressSuggestionsLoad: 2500,
+      addressSuggestionSelect: 3000,
+      autofillWait: 1000,
+      buttonPollInterval: 2000
     },
-    login: {
-        email: process.env.TEST_USER_EMAIL || "naveed.chughtai@rltsquare.com",
-        password: process.env.TEST_USER_PASSWORD || "Rlt@20250101"
+
+    regex: {
+      paymentPage: /\/checkout\/payment/i,
+      shippingPage: /\/checkout\/shipping/i,
+      cartPage: /\/cart/i,
+      confirmationPage: /order-confirmation|thank-you|success/i,
+      emailDomain: /@[\w.-]+\.[a-z]{2,}$/i
     },
-    checkout: {
-        email: process.env.CHECKOUT_EMAIL || "sana.zafar@rltsquare.com",
-        password: process.env.TEST_USER_PASSWORD || "Sana@321",
-        shipping: {
-            firstName: "John",
-            lastName: "Doe",
-            addressLine1: "123 Main Street",
-            addressLine2: "Apt 4B",
-            city: "New York",
-            postCode: "10001",
-            countryCode: "US",
-            province: "NY",
-            phoneNumber: "1234567890"
-        },
-        payment: {
-            cardNumber: process.env.PAYMENT_CARD_NUMBER || "4242424242424242",
-            expiry: "12/30",
-            cvc: process.env.PAYMENT_CVC || "123",
-            cardName: "John Doe"
-        },
-        paymentMethods: {
-            default: "card",
-            card: "Card",
-            paypal: "PayPal",
-            klarna: "Klarna",
-            testprovider: "Test Provider",
-            bank: "Bank Transfer",
-            afterpay: "Afterpay",
-            clearpay: "Clearpay"
-        },
-        couponCode: process.env.COUPON_CODE || "R5D48EF48",
-        expectedTitles: {
-            checkout: "Checkout - EGO",
-            confirmation: "Order Confirmation - EGO"
-        },
-        manualEntryLabels: [
-            'button:has-text("Enter address manually")',
-            'a:has-text("Enter address manually")',
-            'span:has-text("Enter address manually")',
-            'text=Or Enter Your Address Manually'
-        ],
-        stateMappings: {
-            US: {
-                'NY': 'New York',
-                'CA': 'California',
-                'TX': 'Texas',
-                'FL': 'Florida',
-                'IL': 'Illinois'
-            },
-            AU: {
-                'NSW': 'New South Wales',
-                'VIC': 'Victoria',
-                'QLD': 'Queensland',
-                'WA': 'Western Australia',
-                'SA': 'South Australia',
-                'TAS': 'Tasmania',
-                'ACT': 'Australian Capital Territory',
-                'NT': 'Northern Territory'
-            }
-        },
-        labels: {
-            continue: "Continue",
-            continueUpper: "CONTINUE",
-            payNow: "Pay Now",
-            signIn: "Sign in",
-            inputLabels: {
-                firstName: "First Name",
-                lastName: "Last Name",
-                address1: "Address Line 1",
-                address2: "Address Line 2",
-                city: "City",
-                postCode: "Post Code",
-                country: "Country",
-                phone: "Phone Number",
-                cardNumber: "Card Number",
-                expiryDate: "Expiry Date",
-                cvc: "CVC"
-            }
-        },
-        selectors: {
-            continueButton: "#checkout-shipping-continue"
-        },
-        stripeInputNames: {
-            cardNumber: "cardnumber",
-            expDate: "exp-date",
-            cvc: "cvc"
-        },
-        confirmationUrlPattern: "order-confirmation|thank-you|success",
-        retries: {
-            shippingContinue: 5,
-            continueToPayment: 5
-        },
-        settleMs: {
-            afterEmail: 200,
-            afterSignIn: 500,
-            afterContinue: 300,
-            afterProvince: 1500,
-            afterShippingMethod: 2000,
-            shippingContinueWait: 3000,
-            buttonPollInterval: 2000
-        }
+
+    defaultProvinceInput: "NY",
+
+    shipping: {
+      ...DEFAULT_USER,
+      ...DEFAULT_ADDRESS_US,
+      addressLine1: DEFAULT_ADDRESS_US.street,
+      addressLine2: "",
+      phoneNumber: "1234567890"
     },
-    plp: {
-        productLimit: 40,
-        loadMoreTimeout: 20000,
-        subCategoryFilter: "NEW IN",
-        categoryUrlIdentifier: "/c/",
-        productUrlIdentifier: "/p/",
-        navigationTimeout: 5000,
-        defaultProductIndex: 3,
-        subCategoryFilterIgnore: "NEW IN"
+
+    payment: {
+      cardNumber: ENV.PAYMENT_CARD_NUMBER,
+      expiry: "12/30",
+      cvc: ENV.PAYMENT_CVC,
+      cardName: `${DEFAULT_USER.firstName} ${DEFAULT_USER.lastName}`
     },
-    homepage: {
-        preferredSizes: ["UK 6", "UK 7", "UK 5"],
-        categories: ["CO_ORDS", "TOPS", "DRESSES", "LOUNGEWEAR"],
-        categoryNames: {
-            "CO_ORDS": "Co-Ords",
-            "TOPS": "Tops",
-            "DRESSES": "Dresses",
-            "LOUNGEWEAR": "Loungewear"
-        }
+
+    paymentMethods: {
+      default: "card",
+      card: "Card",
+      paypal: "PayPal",
+      klarna: "Klarna",
+      testprovider: "Test Provider",
+      bank: "Bank Transfer",
+      afterpay: "Afterpay",
+      clearpay: "Clearpay"
     },
-    registration: {
-        personalDetails: {
-            firstName: "Naveed",
-            lastName: "Chughtai",
-            password: process.env.TEST_USER_PASSWORD || "Rlt@20250101",
-            confirmPassword: process.env.TEST_USER_PASSWORD || "Rlt@20250101"
-        },
-        dob: {
-            months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-        },
-        locales: {
-            uk: {
-                country: "United Kingdom",
-                phone: "7400123456",
-                address: {
-                    street: "Longford Trading Estate",
-                    city: "Manchester",
-                    postCode: "M32 0JT"
-                },
-                countryCode: "GB"
-            },
-            eu: {
-                country: "Ireland",
-                phone: "871234567",
-                address: {
-                    street: "123 Dublin St",
-                    city: "Dublin",
-                    postCode: "D01 A1B2"
-                },
-                countryCode: "IE"
-            },
-            us: {
-                country: "United States",
-                phone: "2125551234",
-                address: {
-                    street: "123 New York St",
-                    city: "New York",
-                    postCode: "10001"
-                },
-                countryCode: "US"
-            },
-            ae: {
-                country: "United Arab Emirates",
-                phone: "501234567",
-                address: {
-                    street: "Sheikh Zayed Road",
-                    city: "Dubai",
-                    postCode: "00000"
-                },
-                countryCode: "AE"
-            },
-            ca: {
-                country: "Canada",
-                phone: "4165551234",
-                address: {
-                    street: "123 Yonge Street",
-                    city: "Toronto",
-                    postCode: "M5B 1M4",
-                    state: "Ontario"
-                },
-                countryCode: "CA"
-            },
-            au: {
-                country: "Australia",
-                phone: "412345678",
-                address: {
-                    street: "123 George Street",
-                    city: "Sydney",
-                    postCode: "2000",
-                    state: "NSW"
-                },
-                countryCode: "AU"
-            }
-        }
+
+    couponCode: ENV.COUPON_CODE,
+
+    manualEntryLabels: [
+      'button:has-text("Enter address manually")',
+      'a:has-text("Enter address manually")',
+      'button:has-text("Manual entry")',
+      '[data-test="manual-address-entry"]',
+      '.manual-address-link',
+      'button:has-text("Enter manually")'
+    ],
+
+    stateMappings: {
+      US: {
+        NY: "New York",
+        CA: "California",
+        TX: "Texas",
+        FL: "Florida",
+        IL: "Illinois",
+        PA: "Pennsylvania",
+        OH: "Ohio",
+        GA: "Georgia",
+        NC: "North Carolina",
+        MI: "Michigan"
+      }
     },
-    pdp: {
-        labels: {
-            selectSize: "Select a Size",
-            notifyMe: "Notify Me",
-            addToBag: "Add to Bag"
-        }
+
+    labels: {
+      inputLabels: {
+        firstName: "First Name",
+        lastName: "Last Name",
+        address1: "Address Line 1",
+        address2: "Address Line 2",
+        city: "City",
+        postCode: "Post Code",
+        country: "Country",
+        phone: "Phone Number",
+        cardNumber: "Card Number",
+        expiryDate: "Expiry Date",
+        cvc: "CVC"
+      }
     },
-    cart: {
-        labels: {
-            outOfStock: "out of stock"
-        },
-        couponCode: process.env.COUPON_CODE || "R5D48EF48"
+
+    expectedTitles: {
+      checkout: "Checkout - EGO",
+      confirmation: "Order Confirmation - EGO"
     },
-    timeouts: {
-        small: 2000,
-        medium: 5000,
-        large: 15000,
-        xlarge: 25000,
-        huge: 30000,
-        extreme: 45000
+
+    stripeInputNames: {
+      cardNumber: "cardnumber",
+      expDate: "exp-date",
+      cvc: "cvc"
     },
-    search: {
-        keywords: {
-            valid: "dress",
-            invalid: "nonexistentproductxyz",
-            partial: "dres",
-            suggestionTrigger: "dress",
-            oos: "sold out",
-            trending: "Trending",
-            randomKeywords: ["dress", "tops", "shoes", "boots", "heels", "sandals", "accessories", "jewelry", "bikini", "skirt"]
-        },
-        placeholder: "Search...",
-        noResultsMessage: "Products Matching|0 STYLES",
-        trendingHeader: "Trending Categories|Trending",
-        outOfStockPattern: "Sold Out|Out of Stock"
-    },
-    filterSort: {
-        sortOptions: {
-            relevance: "Relevance",
-            priceLowToHigh: "Price from Low to High",
-            priceHighToLow: "Price from High to Low"
-        },
-        filters: {
-            color: "Black",
-            size: "One Size",
-            priceRange: "$0-$50"
-        }
+
+    confirmationUrlPattern: "order-confirmation|thank-you|success"
+  },
+
+  plp: {
+    productLimit: 40,
+    loadMoreTimeout: 20000,
+    subCategoryFilter: "NEW IN",
+    categoryUrlIdentifier: "/c/",
+    productUrlIdentifier: "/p/",
+    navigationTimeout: 5000,
+    defaultProductIndex: 3
+  },
+
+  homepage: {
+    preferredSizes: ["UK 6", "UK 7", "UK 5"],
+    categories: ["CO_ORDS", "TOPS", "DRESSES", "LOUNGEWEAR"],
+    categoryNames: {
+      CO_ORDS: "Co-Ords",
+      TOPS: "Tops",
+      DRESSES: "Dresses",
+      LOUNGEWEAR: "Loungewear"
     }
+  },
+
+  registration: {
+    personalDetails: {
+      firstName: "Naveed",
+      lastName: "Chughtai",
+      password: ENV.TEST_USER_PASSWORD,
+      confirmPassword: ENV.TEST_USER_PASSWORD
+    },
+    dob: {
+      months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    },
+    locales: {
+      us: {
+        country: "United States",
+        phone: "2125551234",
+        address: {
+          street: "123 Main Street",
+          city: "New York",
+          postCode: "10001",
+          state: "NY"
+        }
+      },
+      uk: {
+        country: "United Kingdom",
+        phone: "07123456789",
+        address: {
+          street: "10 High Street",
+          city: "London",
+          postCode: "SW1A 1AA"
+        }
+      },
+      au: {
+        country: "Australia",
+        phone: "0412345678",
+        address: {
+          street: "1 George Street",
+          city: "Sydney",
+          postCode: "2000",
+          state: "New South Wales"
+        }
+      }
+    }
+  },
+
+  pdp: {
+    labels: {
+      selectSize: "Select a Size",
+      notifyMe: "Notify Me",
+      addToBag: "Add to Bag"
+    }
+  },
+
+  cart: {
+    labels: {
+      outOfStock: "out of stock"
+    },
+    couponCode: ENV.COUPON_CODE
+  },
+
+  timeouts,
+  search
 };
 
 module.exports = { testData };

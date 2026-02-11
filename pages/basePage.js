@@ -131,6 +131,7 @@ class BasePage {
   }
 
   async ensureHomeAndReady(locale = null) {
+    if (this.homePageLoaded) return;
     const currentLocale = locale || process.env.LOCALE || 'us';
     const isUK = ['uk', 'eu'].includes(currentLocale);
 

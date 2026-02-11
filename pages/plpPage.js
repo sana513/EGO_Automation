@@ -193,6 +193,8 @@ class ProductListingPage extends BasePage {
   }
 
   async openRandomProduct() {
+    await this.closeModalIfPresent();
+
     const products = this.page.locator(this.productTile);
     const count = await products.count();
 
@@ -210,6 +212,7 @@ class ProductListingPage extends BasePage {
   }
 
   async openSubCategory(mainIndex = 0, subIndex = 0) {
+    await this.closeModalIfPresent();
     const mainCategories = this.page.locator(this.mainCategoryLinks);
     if (!(await mainCategories.count())) {
       throw new Error('No main categories found');
@@ -280,6 +283,7 @@ class ProductListingPage extends BasePage {
   }
 
   async getNavigationStructure() {
+    await this.closeModalIfPresent();
     const currentLocale = process.env.LOCALE || 'us';
     const isUK = ['uk', 'eu'].includes(currentLocale);
 

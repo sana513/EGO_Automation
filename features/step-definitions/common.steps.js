@@ -6,7 +6,6 @@ const BasePage = require('../../pages/basePage');
 Given('I open the website for {string}', async function (country) {
   this.basePage = new BasePage(this.page);
 
-  // Use LOCALE from environment if set, otherwise use the country parameter
   const locale = process.env.LOCALE || country;
   await this.basePage.navigate(this.basePage.getBaseUrl(locale));
 });
