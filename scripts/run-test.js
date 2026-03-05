@@ -1,12 +1,14 @@
 const { execSync } = require('child_process');
 
 const args = process.argv.slice(2);
-let env = 'stage';
-let locale = 'us';
-let headless = 'true';
+
+let env = process.env.ENV || 'stage';
+let locale = process.env.LOCALE || 'us';
+let headless = process.env.HEADLESS || 'true';
 let featureFile = '';
 let tags = '';
 let format = '';
+
 for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 

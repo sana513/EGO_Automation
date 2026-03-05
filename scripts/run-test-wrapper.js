@@ -57,7 +57,6 @@ if (!config) {
   process.exit(1);
 }
 
-// Check if additional args contain tags
 let finalTags = config.tags;
 let otherArgs = [];
 
@@ -71,11 +70,10 @@ for (let i = 0; i < additionalArgs.length; i++) {
       additionalTag = additionalArgs[i + 1];
       if (additionalTag) {
         additionalTag = additionalTag.replace(/['"]/g, '');
-        i++; // Skip next arg since we used it
+        i++; 
       }
     }
     if (additionalTag && !additionalTag.startsWith('--')) {
-      // Combine tags with AND logic
       finalTags = `"${config.tags} and ${additionalTag}"`;
     }
   } else {

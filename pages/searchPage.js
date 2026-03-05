@@ -1,6 +1,7 @@
 const BasePage = require("./basePage");
 const { SearchLocators } = require("../locators/searchLocators");
 const { testData } = require("../config/testData");
+const { TIMEOUTS } = require("../config/constants");
 const { expect } = require("@playwright/test");
 const { settle } = require("../utils/dynamicWait");
 
@@ -31,12 +32,12 @@ class SearchPage extends BasePage {
     await this.fill(input, keyword);
 
     await this.page.keyboard.press("Enter");
-    await this.page.waitForLoadState('domcontentloaded', { timeout: testData.timeouts.large });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: TIMEOUTS.large });
 
     try {
       await Promise.any([
-        this.page.locator(SearchLocators.productResultItems).first().waitFor({ state: "visible", timeout: testData.timeouts.xlarge }),
-        this.page.locator(SearchLocators.noResultsMessage).first().waitFor({ state: "visible", timeout: testData.timeouts.xlarge })
+        this.page.locator(SearchLocators.productResultItems).first().waitFor({ state: "visible", timeout: TIMEOUTS.xlarge }),
+        this.page.locator(SearchLocators.noResultsMessage).first().waitFor({ state: "visible", timeout: TIMEOUTS.xlarge })
       ]);
     } catch {
       console.warn("No search results or no-results message appeared within expected time.");
@@ -48,13 +49,13 @@ class SearchPage extends BasePage {
     await settle(this.page, 300);
 
     const input = this.page.locator(SearchLocators.searchInput).first();
-    await input.waitFor({ state: "visible", timeout: testData.timeouts.medium });
+    await input.waitFor({ state: "visible", timeout: TIMEOUTS.medium });
     await this.fill(input, keyword);
     await settle(this.page, 500);
 
     await this.page.locator(SearchLocators.suggestionItems).first().waitFor({
       state: "visible",
-      timeout: testData.timeouts.medium
+      timeout: TIMEOUTS.medium
     });
   }
 
@@ -65,7 +66,7 @@ class SearchPage extends BasePage {
 
   async verifySearchResults() {
     const results = this.page.locator(SearchLocators.productResultItems);
-    await expect(results.first()).toBeVisible({ timeout: testData.timeouts.large });
+    await expect(results.first()).toBeVisible({ timeout: TIMEOUTS.large });
     expect(await results.count()).toBeGreaterThan(0);
   }
 
@@ -84,7 +85,7 @@ class SearchPage extends BasePage {
     }
 
     if (!found) {
-      await expect(noResults.first()).toBeVisible({ timeout: testData.timeouts.large });
+      await expect(noResults.first()).toBeVisible({ timeout: TIMEOUTS.large });
     }
   }
 
@@ -125,14 +126,14 @@ class SearchPage extends BasePage {
 
   async openProductFromResultByIndex(index = 0) {
     const results = this.page.locator(SearchLocators.productResultItems);
-    await results.first().waitFor({ state: "visible", timeout: testData.timeouts.large });
+    await results.first().waitFor({ state: "visible", timeout: TIMEOUTS.large });
 
     const count = await results.count();
     if (count === 0) throw new Error("No search results found to open");
     if (index >= count) index = count - 1;
 
     await results.nth(index).click();
-    await this.page.waitForLoadState('domcontentloaded', { timeout: testData.timeouts.large });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: TIMEOUTS.large });
   }
 }
 

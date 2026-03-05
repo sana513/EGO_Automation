@@ -5,6 +5,7 @@ const SearchPage = require('./searchPage');
 const { pdpLocators } = require('../locators/pdpLocators');
 const { AddToCartLocators } = require('../locators/addToCartLocators');
 const { testData } = require('../config/testData');
+const { pdpLabels } = require('../config/egoLabels');
 const { waitForNetworkSettled, settle } = require('../utils/dynamicWait');
 
 class ProductDetailPage extends BasePage {
@@ -131,7 +132,7 @@ class ProductDetailPage extends BasePage {
         for (let i = 0; i < count; i++) {
             const listItem = sizeListItems.nth(i);
             const itemText = await listItem.textContent();
-            const hasNotifyMe = itemText && itemText.includes(testData.pdp.labels.notifyMe);
+            const hasNotifyMe = itemText && itemText.includes(pdpLabels.notifyMe);
             const sizeSpan = listItem.locator(pdpLocators.sizeSpan).first();
             const sizeText = await sizeSpan.textContent();
             const disabled = await sizeSpan.getAttribute('disabled');
@@ -182,7 +183,8 @@ class ProductDetailPage extends BasePage {
         ]).catch(() => false);
 
         if (!onCartPage) {
-            const base = this.getBaseUrl().replace(/\/?$/, '');
+            const currentUrl = this.page.url();
+            const base = new URL(currentUrl).origin;
             const cartUrl = `${base}/cart`;
             await this.page.goto(cartUrl, { waitUntil: 'domcontentloaded', timeout: testData.timeouts.medium }).catch(() => { });
             await this.page.locator(AddToCartLocators.Update_quantity).first().waitFor({ state: 'visible', timeout: testData.timeouts.medium }).catch(() => { });

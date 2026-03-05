@@ -9,6 +9,21 @@ const CheckoutLocators = {
   continueToShipping: '[data-test="customer-continue-as-guest-button"], #checkout-customer-continue',
   signInButton: '[data-test="customer-continue-button"], button:has-text("Sign in")',
   passwordInput: '[data-test="customer-password-input"], input[name="password"]',
+  savedAddress: '[data-test="shipping-address-card"], .address-info',
+
+  /* ---------- CHECKOUT AUTHENTICATION ---------- */
+  checkoutAuthPage: 'h2:has-text("CHECKOUT AS A GUEST"), h2:has-text("SIGN IN AND CHECKOUT")',
+
+  // Guest checkout form (left side)
+  guestCheckoutSection: 'h2:has-text("CHECKOUT AS A GUEST")',
+  checkoutAsGuestButton: 'button[type="submit"]:has-text("CHECKOUT AS A GUEST")',
+  checkoutAsGuestEmailInput: 'h2:has-text("CHECKOUT AS A GUEST") ~ form input[data-testid="email-input"]',
+
+  // Sign in form (right side)
+  signInSection: 'h2:has-text("SIGN IN AND CHECKOUT")',
+  signInAndCheckoutButton: 'button[type="submit"]:has-text("SIGN IN AND CHECKOUT")',
+  signInEmailInput: 'h2:has-text("SIGN IN AND CHECKOUT") ~ form input[data-testid="email-input"]',
+  signInPasswordInput: 'h2:has-text("SIGN IN AND CHECKOUT") ~ form input[data-testid="input-field"][type="password"]',
 
   /* ---------- SHIPPING ---------- */
   shippingStep: '[data-test="checkout-shipping"]',
@@ -51,26 +66,11 @@ const CheckoutLocators = {
   shippingMethodContinue: '[data-test="checkout-shipping-method-continue"], #checkout-shipping-method-continue, .form-actions button.optimizedCheckout-buttonPrimary[type="submit"], button.button--primary:has-text("Continue"), button[type="submit"]:has-text("Continue")',
 
   /* ---------- PAYMENT ---------- */
-  paymentStep: '[data-test="payment-form"]',
+  paymentStep: '[data-test="checkout-payment"]',
+  termsCheckbox: '#terms, input[name="terms"][type="checkbox"]',
+  payNowButton: '[data-test="checkout-payment-continue"], button[type="submit"]:has-text("Pay Now"), #checkout-payment-continue, button[type="submit"]:has-text("Place Order"), button.optimizedCheckout-buttonPrimary',
 
   payment: {
-    payNowButton: '[data-test="checkout-payment-continue"], #checkout-payment-continue, button[type="submit"]:has-text("Place Order"), button[type="submit"]:has-text("Pay Now"), button.optimizedCheckout-buttonPrimary',
-
-    checkoutComIframes: {
-      cardNumber: '#checkoutcom-credit_card-ccNumber iframe',
-      cardName: '#checkoutcom-credit_card-ccName iframe',
-      expiry: '#checkoutcom-credit_card-ccExpiry iframe',
-      cvv: '#checkoutcom-credit_card-ccCvv iframe'
-    },
-
-    stripeIframe: 'iframe[name^="__privateStripeFrame"]',
-
-    directCardInputs: {
-      number: 'input[name="ccnumber"], [data-test="card-number-input"]',
-      expiry: 'input[name="ccexp"], [data-test="card-expiry-input"]',
-      cvc: 'input[name="cvv"], [data-test="card-cvc-input"]'
-    },
-
     methods: {
       card: '[data-test="payment-method-credit_card"]',
       paypal: '[data-test="payment-method-paypalcommerce"]',
@@ -78,6 +78,34 @@ const CheckoutLocators = {
       afterpay: '[data-test="payment-method-pay_by_installment"]',
       clearpay: '[data-test="payment-method-clearpay"]'
     }
+  },
+
+  threeDSecure: {
+    iframes: [
+      'iframe[name="cko-3ds2-iframe"]',
+      'iframe[id="cko-3ds2-challenge-iframe"]',
+      'iframe.challengeIframe',
+      'iframe[name*="3ds"]',
+      'iframe[id*="3ds"]'
+    ],
+    inputs: [
+      'input[type="password"]',
+      'input[name="password"]',
+      'input[id*="password" i]',
+      'input[placeholder*="password" i]',
+      'input[placeholder*="code" i]',
+      'input[name*="code" i]',
+      'input[id*="code" i]',
+      'input[type="text"]'
+    ],
+    submitButtons: [
+      'button[type="submit"]',
+      'button:has-text("Submit")',
+      'button:has-text("Continue")',
+      'input[type="submit"]',
+      'button:has-text("Verify")',
+      'button'
+    ]
   },
 
   /* ---------- UTILITY ---------- */

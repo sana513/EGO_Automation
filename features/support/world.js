@@ -11,7 +11,7 @@ class CustomWorld {
     this.page = null;
     this.searchPage = null;
     this.config = getConfig();
-    this._cookieHandled = false;
+    this.cookieHandled = false; // Instance-based state instead of global
   }
 
   async attachScreenshot(name = "screenshot") {

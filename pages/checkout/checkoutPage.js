@@ -3,7 +3,11 @@ const { CheckoutLocators } = require('../../locators/checkoutLocators');
 const BasePage = require('../basePage');
 const AddToCartPage = require('../addToCartPage');
 const { testData } = require('../../config/testData');
-const { settle } = require('../../utils/dynamicWait');
+const { TIMEOUTS, CHECKOUT_WAIT_TIMES } = require('../../config/constants');
+const { checkoutLogs } = require('../../config/egoLogs');
+const { checkoutLabels } = require('../../config/egoLabels');
+const { settle, clickWhenReady, safeFill } = require('../../utils/dynamicWait');
+const PaymentMethods = require('../paymentMethods/payByCard');
 
 class CheckoutPage extends BasePage {
     constructor(page) {
@@ -11,261 +15,192 @@ class CheckoutPage extends BasePage {
         this.page = page;
         this.config = testData.checkout;
         this.locators = CheckoutLocators;
-        this.timeouts = testData.timeouts;
+        this.timeouts = TIMEOUTS;
+        this.waits = CHECKOUT_WAIT_TIMES;
+        this.logs = checkoutLogs;
+        this.labels = checkoutLabels;
         this.addToCartPage = new AddToCartPage(page);
+        this.paymentMethods = new PaymentMethods(page, this.locators, this.config, this.timeouts);
     }
 
-    /* ---------- SHARED CHECKOUT STEPS ---------- */
-
+    /**
+     * Clicks the continue button on shipping address form
+     * Waits for navigation to shipping method or payment step
+     * @returns {Promise<void>}
+     */
     async clickShippingContinue() {
-        const btn = this.page.locator(this.locators.shipping.continueToShippingMethod);
-        await btn.waitFor({ state: 'visible', timeout: this.timeouts.large });
-        await btn.click();
+        await clickWhenReady(this.page, this.locators.shipping.continueToShippingMethod, this.timeouts.large);
         await this.page.waitForURL(new RegExp('shipping-method|payment', 'i'), { timeout: this.timeouts.large });
-        console.log("Moved to next checkout step");
+        console.log(this.logs.movedToNextStep);
     }
 
+    /**
+     * Selects a shipping method from available options
+     * If multiple methods available, selects one randomly
+     * @returns {Promise<void>}
+     */
     async selectShippingMethod() {
-        console.log("Waiting for shipping methods to load...");
-        const section = this.page.locator(this.locators.shippingMethodStep).first();
-        await section.waitFor({ state: 'visible', timeout: this.timeouts.large }).catch(() => { });
-        await settle(this.page, this.config.waitTimes.shippingMethodLoad);
-
+        console.log(this.logs.selectingShippingMethod);
         const methods = await this.page.locator(this.locators.shippingMethodRadio).all();
-        if (methods.length === 1) {
-            console.log("Only one shipping method available, selecting it");
-            await methods[0].click({ force: true });
-        } else if (methods.length > 1) {
-            const randomIndex = Math.floor(Math.random() * methods.length);
-            console.log(`Random shipping method selected: index ${randomIndex}`);
-            await methods[randomIndex].click({ force: true });
-        } else {
-            console.warn("No shipping methods found - might be auto-selected or not required");
-        }
-
-        await settle(this.page, this.config.waitTimes.shippingMethodSelection);
+        if (methods.length === 1) await methods[0].click({ force: true });
+        else if (methods.length > 1) await methods[Math.floor(Math.random() * methods.length)].click({ force: true });
+        else console.warn(this.logs.noShippingMethods);
+        await settle(this.page, this.waits.shippingMethodSelection);
     }
 
     async continueToPayment() {
-        if (this.config.regex.paymentPage.test(this.page.url())) {
-            console.log("Already on payment page, skipping continue button");
-            return;
-        }
-
-        const pollInterval = this.config.waitTimes.buttonPollInterval;
-        const retries = this.config.retries?.continueToPayment ?? 10;
-
-        for (let i = 0; i < retries; i++) {
-            console.log(`Attempt ${i + 1}/${retries} to find continue to payment button`);
-
-            const methodsContinueBtn = this.page.locator(this.locators.shippingMethodContinue).first();
-            const fallbackBtn = this.page.locator(this.locators.shippingMethodContinueFallback).first();
-
-            let finalBtn = null;
-            if (await methodsContinueBtn.isVisible({ timeout: this.timeouts.small }).catch(() => false)) {
-                finalBtn = methodsContinueBtn;
-                console.log("Found primary continue button");
-            } else if (await fallbackBtn.isVisible({ timeout: this.timeouts.small }).catch(() => false)) {
-                finalBtn = fallbackBtn;
-                console.log("Found fallback continue button");
-            }
-
-            if (finalBtn) {
-                const errorMsg = this.page.locator(this.locators.shippingError).first();
-                if (await errorMsg.isVisible({ timeout: this.timeouts.small }).catch(() => false)) {
-                    const errorText = await errorMsg.textContent().catch(() => '');
-                    console.log(`Validation error found: ${errorText}`);
-                }
-
-                let isEnabled = false;
-                for (let waitAttempt = 0; waitAttempt < 3; waitAttempt++) {
-                    const buttonState = await finalBtn.evaluate(el => ({
-                        disabled: el.disabled,
-                        hasLoadingClass: el.classList.contains('is-loading'),
-                        hasDisabledClass: el.classList.contains('disabled'),
-                        ariaDisabled: el.getAttribute('aria-disabled')
-                    })).catch(() => ({ disabled: true }));
-
-                    if (!buttonState.disabled && !buttonState.hasLoadingClass) {
-                        isEnabled = true;
-                        break;
-                    }
-                    console.log(`Waiting for button to become enabled (${waitAttempt + 1}/3)`);
-                    await settle(this.page, pollInterval);
-                }
-
-                if (isEnabled || i >= retries - 2) {
-                    console.log(`Attempting to click button (enabled: ${isEnabled})`);
-                    await finalBtn.click({ force: true }).catch(() => { });
-                    console.log("Clicked continue to payment button");
-                    await settle(this.page, this.config.waitTimes.paymentStepLoad);
-
-                    const result = await Promise.race([
-                        this.page.waitForURL(this.config.regex.paymentPage, { timeout: 10000 }).then(() => 'payment'),
-                        this.page.waitForURL(this.config.regex.cartPage, { timeout: 10000 }).then(() => 'cart'),
-                        this.page.locator(this.locators.paymentStep).waitFor({ state: 'visible', timeout: 10000 }).then(() => 'payment-form')
-                    ]).catch(() => null);
-
-                    if (result === 'payment' || result === 'payment-form') {
-                        console.log("Successfully navigated to payment page");
-                        return;
-                    }
-                    if (result === 'cart') throw new Error("Checkout reset to cart — possibly session timeout");
-                }
-            }
-            await settle(this.page, pollInterval);
-        }
-        throw new Error("Failed to continue to payment step after multiple attempts");
+        await this.stableAction(this.locators.shippingMethodContinue, 'click', null, { timeout: this.timeouts.large });
+        await settle(this.page, this.waits.paymentStepLoad);
+        console.log(this.logs.navigatedToPayment);
     }
 
+    /**
+     * Fills payment card details in the checkout form
+     * Handles multiple payment iframe types (Checkout.com, Stripe, BigCommerce)
+     * @param {Object} card - Card details object
+     * @param {string} card.number - Card number
+     * @param {string} card.expiry - Expiry date (MM/YY format)
+     * @param {string} card.cvc - Card security code
+     * @param {string} card.name - Cardholder name
+     * @returns {Promise<void>}
+     */
     async fillCardDetails(card) {
         await this.closeModalIfPresent();
-        console.log("Starting card details entry...");
-
-        await this.page.waitForLoadState('networkidle').catch(() => { });
-        await settle(this.page, this.config.waitTimes.paymentFormLoad);
-
-        const checkoutComCardNumber = await this.page.locator('#checkoutcom-credit_card-ccNumber').count();
-        if (checkoutComCardNumber > 0) {
-            console.log("Using Checkout.com payment iframes");
-            await this.fillCheckoutComFields(card);
-            return;
-        }
-
-        const bigCommerceFrames = await this.page.locator('iframe[src*="checkout/payment/hosted-field"]').count();
-        if (bigCommerceFrames > 0) {
-            console.log("Using BigCommerce hosted fields payment method");
-            await this.fillBigCommerceHostedFields(card);
-            return;
-        }
-
-        const stripeFrames = await this.page.locator(this.locators.payment.stripeIframe).count();
-        if (stripeFrames > 0) {
-            console.log("Using Stripe iframe payment method");
-            await this.fillStripeFields(card);
-            return;
-        }
-
-        const directInputs = await this.page.locator(this.locators.payment.directCardInputs.number).count();
-        if (directInputs > 0) {
-            console.log("Using direct card input method");
-            await this.fillDirectCardInputs(card);
-            return;
-        }
-
-        throw new Error("No payment fields found on the page");
-    }
-
-    async fillCheckoutComFields(card) {
-        const iframes = this.locators.payment.checkoutComIframes;
-
-        const cardNumberFrame = this.page.locator(iframes.cardNumber).contentFrame();
-        await cardNumberFrame.getByRole('textbox', { name: this.config.labels.inputLabels.cardNumber }).waitFor({ timeout: this.timeouts.large });
-        await cardNumberFrame.getByRole('textbox', { name: this.config.labels.inputLabels.cardNumber }).fill(card.number);
-        console.log("Card number filled");
-
-        const cardNameFrame = this.page.locator(iframes.cardName).contentFrame();
-        await cardNameFrame.getByRole('textbox', { name: 'Name on Card' }).fill(card.name);
-        console.log("Cardholder name filled");
-
-        const expiryFrame = this.page.locator(iframes.expiry).contentFrame();
-        await expiryFrame.getByRole('textbox', { name: 'Expiration' }).fill(card.expiry);
-        console.log("Expiry date filled");
-
-        const cvvFrame = this.page.locator(iframes.cvv).contentFrame();
-        await cvvFrame.getByRole('textbox', { name: 'CVV' }).fill(card.cvc);
-        console.log("CVV filled");
-    }
-
-    async fillBigCommerceHostedFields(card) {
-        const allFrames = this.page.locator('iframe[src*="checkout/payment/hosted-field"]');
-        const frameCount = await allFrames.count();
-
-        for (let i = 0; i < frameCount; i++) {
-            const frame = this.page.frameLocator('iframe[src*="checkout/payment/hosted-field"]').nth(i);
-            const input = frame.locator('input').first();
-
-            const isVisible = await input.isVisible({ timeout: this.timeouts.small }).catch(() => false);
-            if (!isVisible) continue;
-
-            const placeholder = await input.getAttribute('placeholder').catch(() => '');
-            const name = await input.getAttribute('name').catch(() => '');
-            const id = await input.getAttribute('id').catch(() => '');
-            const ariaLabel = await input.getAttribute('aria-label').catch(() => '');
-            const autocomplete = await input.getAttribute('autocomplete').catch(() => '');
-
-            const fieldIdentifier = (placeholder + ' ' + name + ' ' + id + ' ' + ariaLabel + ' ' + autocomplete).toLowerCase();
-
-            if (name === 'cardNumber' || autocomplete === 'cc-number' || (fieldIdentifier.includes('number') && !fieldIdentifier.includes('cvv'))) {
-                await input.fill(card.number);
-            } else if (fieldIdentifier.includes('expir') || fieldIdentifier.includes('expiry') || fieldIdentifier.includes('mm')) {
-                await input.fill(card.expiry);
-            } else if (fieldIdentifier.includes('cvv') || fieldIdentifier.includes('cvc') || fieldIdentifier.includes('security')) {
-                await input.fill(card.cvc);
-            } else if (fieldIdentifier.includes('cardholder') || fieldIdentifier.includes('name')) {
-                await input.fill(card.name);
-            }
-        }
-        console.log("BigCommerce hosted fields filled");
-    }
-
-    async fillStripeFields(card) {
-        const frame = this.page.frameLocator(this.locators.payment.stripeIframe);
-        const names = this.config.stripeInputNames;
-        await frame.locator(`input[name="${names.cardNumber}"]`).fill(card.number);
-        await frame.locator(`input[name="${names.expDate}"]`).fill(card.expiry);
-        await frame.locator(`input[name="${names.cvc}"]`).fill(card.cvc);
-        console.log("Stripe details filled");
-    }
-
-    async fillDirectCardInputs(card) {
-        const locators = this.locators.payment.directCardInputs;
-        await this.page.locator(locators.number).fill(card.number);
-        await this.page.locator(locators.expiry).fill(card.expiry);
-        await this.page.locator(locators.cvc).fill(card.cvc);
-        console.log("Direct card inputs filled");
+        await this.paymentMethods.fillCardDetails(card);
     }
 
     async clickPayNow() {
-        console.log("Clicking Pay Now button...");
-        const payBtn = this.page.locator(this.locators.payment.payNowButton);
-        await payBtn.waitFor({ state: 'visible', timeout: this.timeouts.medium });
-        await payBtn.click();
+        // Check for and click terms and conditions checkbox if present
+        const termsCheckbox = this.page.locator(this.locators.termsCheckbox);
+        const termsVisible = await termsCheckbox.isVisible({ timeout: 3000 }).catch(() => false);
 
-        await settle(this.page, this.config.waitTimes.paymentStepLoad);
+        if (termsVisible) {
+            const isChecked = await termsCheckbox.isChecked();
+            if (!isChecked) {
+                console.log(this.logs.clickingTerms);
+                // Use force click since label intercepts pointer events
+                await termsCheckbox.click({ force: true });
+                await settle(this.page, 500);
+                console.log(this.logs.termsAccepted);
+            } else {
+                console.log(this.logs.termsAlreadyChecked);
+            }
+        }
 
-        console.log("Waiting for navigation to confirmation page...");
-        await Promise.race([
-            this.page.waitForURL(this.config.regex.confirmationPage, { timeout: this.timeouts.huge }),
-            this.page.waitForLoadState('networkidle', { timeout: this.timeouts.huge })
-        ]).catch(() => {
-            console.log("Did not detect confirmation page navigation");
-        });
+        await this.stableAction(this.locators.payNowButton, 'click', null, { timeout: this.timeouts.medium });
+        await settle(this.page, 2000);
+        console.log(this.logs.payNowClicked);
+
+        // Handle 3D Secure authentication if present
+        await this.handle3DSecure();
+    }
+
+    async handle3DSecure() {
+        console.log(this.logs.checking3DS);
+        await settle(this.page, 5000);
+
+        // Check if we're on 3DS authentication page by URL or title
+        let currentUrl = this.page.url().toLowerCase();
+        let currentTitle = (await this.page.title()).toLowerCase();
+
+        const is3DSPage = this.labels.threeDSecure.urlKeywords.some(kw => currentUrl.includes(kw.toLowerCase())) ||
+            this.labels.threeDSecure.titleKeywords.some(kw => currentTitle.includes(kw.toLowerCase()));
+
+        if (is3DSPage) {
+            console.log(`${this.logs.dsPageDetected} ${currentUrl}, Title: ${currentTitle}`);
+
+            // Wait for page to fully load through redirects
+            console.log(this.logs.waiting3DSLoad);
+            await this.page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => { });
+            await settle(this.page, 5000);
+
+            // Update URL and title after redirects
+            currentUrl = this.page.url();
+            currentTitle = await this.page.title();
+            console.log(`${this.logs.final3DSPage} ${currentUrl}, Title: ${currentTitle}`);
+
+            let frameContext = null;
+            for (const iframeSelector of this.locators.threeDSecure.iframes) {
+                const iframe = this.page.locator(iframeSelector).first();
+                const iframeExists = await iframe.count() > 0;
+
+                if (iframeExists) {
+                    console.log(`${this.logs.iframeFound} ${iframeSelector}`);
+                    frameContext = await iframe.contentFrame();
+
+                    if (frameContext) {
+                        console.log(this.logs.gotIframeContext);
+                        break;
+                    }
+                }
+            }
+
+            // If iframe found, work within iframe context, otherwise use main page
+            const context = frameContext || this.page;
+
+            let inputFound = false;
+            for (const selector of this.locators.threeDSecure.inputs) {
+                const input = context.locator(selector).first();
+                const isVisible = await input.isVisible({ timeout: 2000 }).catch(() => false);
+
+                if (isVisible) {
+                    console.log(`${this.logs.inputFieldFound} ${selector}`);
+
+                    const secureCode = this.labels.threeDSecure.secureCode;
+                    await input.fill(secureCode);
+                    console.log(`${this.logs.enteredSecureCode} ${secureCode}`);
+
+                    await settle(this.page, 1000);
+
+                    // Look for submit button in same context
+                    let submitBtnClicked = false;
+                    for (const btnSelector of this.locators.threeDSecure.submitButtons) {
+                        const btn = context.locator(btnSelector).first();
+                        if (await btn.isVisible({ timeout: 1000 }).catch(() => false)) {
+                            await btn.click();
+                            submitBtnClicked = true;
+                            break;
+                        }
+                    }
+
+                    if (submitBtnClicked) {
+                        console.log(this.logs.submitted3DS);
+                        inputFound = true;
+                    }
+                    break;
+                }
+            }
+
+            if (!inputFound) {
+                console.log(this.logs.inputNotFound);
+            }
+
+            // Wait for navigation back to order confirmation
+            await this.page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => { });
+            await settle(this.page, 3000);
+            console.log(this.logs.authCompleted);
+        } else {
+            console.log(this.logs.noAuthRequired);
+        }
     }
 
     async verifyOrderConfirmation() {
         await this.page.waitForLoadState('networkidle', { timeout: this.timeouts.medium }).catch(() => { });
-        const urlMatch = this.config.regex.confirmationPage.test(this.page.url());
-        if (!urlMatch) {
+        if (!this.config.regex.confirmationPage.test(this.page.url())) {
             await expect(this.page).toHaveTitle(new RegExp(this.config.expectedTitles.confirmation, 'i'));
         }
-        console.log("Order confirmed");
+        console.log(this.logs.orderConfirmed);
     }
 
-    async closeModalIfPresent() {
-        for (const selector of this.locators.modalCloseSelectors) {
-            const modalClose = this.page.locator(selector).first();
-            if (await modalClose.isVisible({ timeout: this.timeouts.small }).catch(() => false)) {
-                await modalClose.click();
-                await settle(this.page, this.config.waitTimes.modalClose);
-                return;
-            }
-        }
-    }
-
+    /**
+     * Selects province/state from dropdown or fills input field
+     * Handles both select dropdowns and text inputs
+     * @param {string} provinceFromData - Province/state code (e.g., 'NY', 'ON')
+     * @returns {Promise<void>}
+     */
     async selectProvince(provinceFromData) {
-        console.log("Waiting for province field to stabilize...");
-        await settle(this.page, this.config.waitTimes.provinceStabilize);
+        console.log(this.logs.provinceStabilize);
+        await settle(this.page, this.waits.provinceStabilize);
 
         let dropdown = null;
         let foundSelector = null;
@@ -280,11 +215,11 @@ class CheckoutPage extends BasePage {
         }
 
         if (!dropdown) {
-            console.log("Province field not found - skipping");
+            console.log(this.logs.provinceNotFound);
             return;
         }
 
-        await settle(this.page, this.config.waitTimes.provinceOptionsLoad);
+        await settle(this.page, this.waits.provinceOptionsLoad);
         const tagName = await dropdown.evaluate(el => el.tagName.toLowerCase()).catch(() => 'unknown');
 
         if (tagName === 'select') {
@@ -294,7 +229,7 @@ class CheckoutPage extends BasePage {
             }, foundSelector, { timeout: this.timeouts.large }).catch(() => { });
 
             await dropdown.click();
-            await settle(this.page, this.config.waitTimes.provinceDropdownClick);
+            await settle(this.page, this.waits.provinceDropdownClick);
 
             const options = await dropdown.evaluate(el =>
                 Array.from(el.options)
@@ -304,20 +239,14 @@ class CheckoutPage extends BasePage {
 
             if (options.length > 0) {
                 await dropdown.selectOption(options[0].value);
-                await settle(this.page, this.config.waitTimes.provinceSelection);
-                console.log(`Province selected: ${options[0].text}`);
+                await settle(this.page, this.waits.provinceSelection);
+                console.log(`${this.logs.provinceSelected} ${options[0].text}`);
             }
         } else if (tagName === 'input') {
             await dropdown.fill(this.config.defaultProvinceInput);
-            await settle(this.page, this.config.waitTimes.provinceInputFill);
-            console.log("Province input filled");
+            await settle(this.page, this.waits.provinceInputFill);
+            console.log(this.logs.provinceInputFilled);
         }
-    }
-
-    async selectPaymentMethod(methodKey) {
-        const selector = this.locators.payment.methods[methodKey];
-        if (!selector) throw new Error(`Unsupported payment method: ${methodKey}`);
-        await this.page.locator(selector).first().click();
     }
 }
 

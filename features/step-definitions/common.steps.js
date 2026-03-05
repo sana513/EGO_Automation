@@ -16,6 +16,12 @@ Given('I open the website', async function () {
   await this.basePage.navigate(this.basePage.getBaseUrl(locale));
 });
 
+Given('I navigate to the homepage', async function () {
+  this.basePage = new BasePage(this.page);
+  const locale = process.env.LOCALE || 'us';
+  await this.basePage.navigate(this.basePage.getBaseUrl(locale));
+});
+
 
 Then('I should be successfully registered', async function () {
   const currentLocale = process.env.LOCALE || 'us';
