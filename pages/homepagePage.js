@@ -64,7 +64,18 @@ class HomePage extends basePage {
 
   async verifyCategory(category) {
     const locator = HomePageLocators.CATEGORY_CARDS[category];
-    await expect(this.page.locator(locator).first()).toBeVisible();
+    const element = this.page.locator(locator).first();
+    
+    await this.closeModalIfPresent();
+    await settle(this.page, 500);
+    
+    await element.scrollIntoViewIfNeeded().catch(() => {});
+    await settle(this.page, 300);
+    
+    await this.closeModalIfPresent();
+    await settle(this.page, 300);
+    
+    await expect(element).toBeVisible({ timeout: testData.timeouts.medium });
   }
 
   async verifyPopularCategories() {

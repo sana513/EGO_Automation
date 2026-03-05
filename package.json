@@ -16,7 +16,11 @@
     "test:checkout:customer": "node scripts/run-test-wrapper.js checkout --tags @customer",
     "test:search": "node scripts/run-test-wrapper.js search",
     "test:logout": "node scripts/run-test-wrapper.js logout",
-    "test:fulljourney": "node scripts/run-test-wrapper.js fulljourney"
+    "test:fulljourney": "node scripts/run-test-wrapper.js fulljourney",
+    "test:api": "playwright test tests/api",
+    "test:api:product": "playwright test tests/api/product.api.spec.js",
+    "test:api:cart": "playwright test tests/api/cart.api.spec.js",
+    "test:hybrid": "playwright test tests/hybrid"
   },
   "dependencies": {
     "chai": "^5.1.0",

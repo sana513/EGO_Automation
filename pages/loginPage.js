@@ -1,6 +1,7 @@
 const BasePage = require("./basePage");
 const { LoginLocators } = require("../locators/loginLocators");
 const { testData } = require("../config/testData");
+const { TIMEOUTS } = require("../config/constants");
 
 class LoginPage extends BasePage {
   constructor(page) {
@@ -52,7 +53,7 @@ class LoginPage extends BasePage {
 
     await this.closeModalIfPresent();
     await this.accountIcon.first().click({ force: true });
-    await this.emailInput.first().waitFor({ state: "visible", timeout: testData.timeouts.xlarge });
+    await this.emailInput.first().waitFor({ state: "visible", timeout: TIMEOUTS.xlarge });
   }
 
   async performLogin(email = testData.login.email, password = testData.login.password) {
@@ -60,7 +61,7 @@ class LoginPage extends BasePage {
     await this.emailInput.first().fill(email);
     await this.passwordInput.first().fill(password);
     await this.submitButton.first().click();
-    await this.page.waitForURL("**/my-account/**", { timeout: testData.timeouts.huge });
+    await this.page.waitForURL("**/my-account/**", { timeout: TIMEOUTS.huge });
   }
 
   async isOnAccountPage() {

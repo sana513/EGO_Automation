@@ -1,3 +1,7 @@
+const { TIMEOUTS, CHECKOUT_WAIT_TIMES } = require('./constants');
+const { checkoutLabels, searchLabels, homepageLabels, cartLabels, registrationLabels, pdpLabels } = require('./egoLabels');
+const { checkoutLogs, guestCheckoutLogs } = require('./egoLogs');
+
 // ==============================
 // ENV + GLOBAL CONSTANTS
 // ==============================
@@ -17,27 +21,55 @@ const DEFAULT_USER = {
   lastName: "Doe"
 };
 
-const DEFAULT_ADDRESS_US = {
-  street: "123 Main Street",
-  city: "New York",
-  postCode: "10001",
-  state: "NY",
-  provinceCode: "NY",
-  countryCode: "US"
+const ADDRESSES = {
+  US: {
+    street: "123 Main Street",
+    city: "New York",
+    postCode: "10001",
+    state: "NY",
+    provinceCode: "NY",
+    countryCode: "US",
+    phone: "2125551234"
+  },
+  UK: {
+    street: "10 Downing Street",
+    city: "London",
+    postCode: "SW1A 2AA",
+    state: "",
+    provinceCode: "",
+    countryCode: "GB",
+    phone: "02079251234"
+  },
+  EU: {
+    street: "Rue de la Loi 175",
+    city: "Brussels",
+    postCode: "1040",
+    state: "",
+    provinceCode: "",
+    countryCode: "BE",
+    phone: "025551234"
+  },
+  CA: {
+    street: "123 Maple Street",
+    city: "Toronto",
+    postCode: "M5H 2N2",
+    state: "ON",
+    provinceCode: "ON",
+    countryCode: "CA",
+    phone: "4165551234"
+  },
+  AU: {
+    street: "123 George Street",
+    city: "Sydney",
+    postCode: "2000",
+    state: "NSW",
+    provinceCode: "NSW",
+    countryCode: "AU",
+    phone: "0291234567"
+  }
 };
+const DEFAULT_ADDRESS_US = ADDRESSES.US;
 
-// ==============================
-// TIMEOUTS
-// ==============================
-
-const timeouts = {
-  small: 2000,
-  medium: 5000,
-  large: 15000,
-  xlarge: 25000,
-  huge: 30000,
-  extreme: 45000
-};
 
 // ==============================
 // SEARCH
@@ -56,10 +88,7 @@ const search = {
       "sandals", "accessories", "jewelry", "bikini", "skirt"
     ]
   },
-  placeholder: "Search...",
-  noResultsMessage: "Products Matching|0 STYLES",
-  trendingHeader: "Trending Categories|Trending",
-  outOfStockPattern: "Sold Out|Out of Stock"
+  ...searchLabels
 };
 
 // ==============================
@@ -67,6 +96,7 @@ const search = {
 // ==============================
 
 const testData = {
+  timeouts: TIMEOUTS,
   e2e: {
     registrationLocale: "uk",
     checkoutEmail: ENV.CHECKOUT_EMAIL,
@@ -82,33 +112,9 @@ const testData = {
     email: ENV.CHECKOUT_EMAIL,
     password: ENV.CHECKOUT_PASSWORD,
     defaultLocale: "us",
+    couponCode: ENV.COUPON_CODE,
 
-    waitTimes: {
-      networkIdle: 20000,
-      emailEntry: 3000,
-      shippingFormLoad: 2000,
-      manualAddressExpand: 2000,
-      fieldBlur: 1000,
-      countryChange: 3000,
-      provinceStabilize: 4000,
-      provinceOptionsLoad: 2000,
-      provinceDropdownClick: 2000,
-      provinceSelection: 2500,
-      provinceInputFill: 1500,
-      shippingContinue: 2000,
-      shippingMethodLoad: 3000,
-      shippingMethodSelection: 1500,
-      paymentStepLoad: 3000,
-      paymentFormLoad: 5000,
-      modalClose: 1000,
-      signIn: 5000,
-      passwordEntry: 3000,
-      authentication: 15000,
-      addressSuggestionsLoad: 2500,
-      addressSuggestionSelect: 3000,
-      autofillWait: 1000,
-      buttonPollInterval: 2000
-    },
+    defaultProvinceInput: "NY",
 
     regex: {
       paymentPage: /\/checkout\/payment/i,
@@ -118,14 +124,12 @@ const testData = {
       emailDomain: /@[\w.-]+\.[a-z]{2,}$/i
     },
 
-    defaultProvinceInput: "NY",
-
     shipping: {
       ...DEFAULT_USER,
       ...DEFAULT_ADDRESS_US,
       addressLine1: DEFAULT_ADDRESS_US.street,
       addressLine2: "",
-      phoneNumber: "1234567890"
+      phoneNumber: DEFAULT_ADDRESS_US.phone
     },
 
     payment: {
@@ -135,27 +139,9 @@ const testData = {
       cardName: `${DEFAULT_USER.firstName} ${DEFAULT_USER.lastName}`
     },
 
-    paymentMethods: {
-      default: "card",
-      card: "Card",
-      paypal: "PayPal",
-      klarna: "Klarna",
-      testprovider: "Test Provider",
-      bank: "Bank Transfer",
-      afterpay: "Afterpay",
-      clearpay: "Clearpay"
-    },
+    paymentMethods: checkoutLabels.paymentMethods,
 
-    couponCode: ENV.COUPON_CODE,
-
-    manualEntryLabels: [
-      'button:has-text("Enter address manually")',
-      'a:has-text("Enter address manually")',
-      'button:has-text("Manual entry")',
-      '[data-test="manual-address-entry"]',
-      '.manual-address-link',
-      'button:has-text("Enter manually")'
-    ],
+    manualEntryLabels: checkoutLabels.manualEntryLabels,
 
     stateMappings: {
       US: {
@@ -171,27 +157,11 @@ const testData = {
         MI: "Michigan"
       }
     },
-
     labels: {
-      inputLabels: {
-        firstName: "First Name",
-        lastName: "Last Name",
-        address1: "Address Line 1",
-        address2: "Address Line 2",
-        city: "City",
-        postCode: "Post Code",
-        country: "Country",
-        phone: "Phone Number",
-        cardNumber: "Card Number",
-        expiryDate: "Expiry Date",
-        cvc: "CVC"
-      }
+      inputLabels: checkoutLabels.inputLabels
     },
 
-    expectedTitles: {
-      checkout: "Checkout - EGO",
-      confirmation: "Order Confirmation - EGO"
-    },
+    expectedTitles: checkoutLabels.expectedTitles,
 
     stripeInputNames: {
       cardNumber: "cardnumber",
@@ -199,7 +169,14 @@ const testData = {
       cvc: "cvc"
     },
 
-    confirmationUrlPattern: "order-confirmation|thank-you|success"
+    logs: checkoutLogs,
+
+    guestCheckout: {
+      logs: guestCheckoutLogs
+    }
+  },
+
+  checkoutAuth: {
   },
 
   plp: {
@@ -215,12 +192,7 @@ const testData = {
   homepage: {
     preferredSizes: ["UK 6", "UK 7", "UK 5"],
     categories: ["CO_ORDS", "TOPS", "DRESSES", "LOUNGEWEAR"],
-    categoryNames: {
-      CO_ORDS: "Co-Ords",
-      TOPS: "Tops",
-      DRESSES: "Dresses",
-      LOUNGEWEAR: "Loungewear"
-    }
+    categoryNames: homepageLabels.categoryNames
   },
 
   registration: {
@@ -231,11 +203,11 @@ const testData = {
       confirmPassword: ENV.TEST_USER_PASSWORD
     },
     dob: {
-      months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+      months: registrationLabels.months
     },
     locales: {
       us: {
-        country: "United States",
+        country: registrationLabels.countries.us,
         phone: "2125551234",
         address: {
           street: "123 Main Street",
@@ -245,7 +217,7 @@ const testData = {
         }
       },
       uk: {
-        country: "United Kingdom",
+        country: registrationLabels.countries.uk,
         phone: "07123456789",
         address: {
           street: "10 High Street",
@@ -254,7 +226,7 @@ const testData = {
         }
       },
       au: {
-        country: "Australia",
+        country: registrationLabels.countries.au,
         phone: "0412345678",
         address: {
           street: "1 George Street",
@@ -262,27 +234,47 @@ const testData = {
           postCode: "2000",
           state: "New South Wales"
         }
+      },
+      eu: {
+        country: registrationLabels.countries.eu,
+        phone: "0470123456",
+        address: {
+          street: "Rue de la Loi 175",
+          city: "Brussels",
+          postCode: "1040"
+        }
       }
     }
   },
 
   pdp: {
-    labels: {
-      selectSize: "Select a Size",
-      notifyMe: "Notify Me",
-      addToBag: "Add to Bag"
-    }
+    maxCategoryRetries: 2,
+    maxProductRetries: 5,
+    maxSearchRetries: 3,
+    maxSearchIndex: 5,
+    oosMessages: ['out of stock', 'sold out', 'currently unavailable', 'not available', 'please select another']
   },
 
   cart: {
-    labels: {
-      outOfStock: "out of stock"
-    },
+    labels: cartLabels,
     couponCode: ENV.COUPON_CODE
   },
 
-  timeouts,
   search
 };
 
-module.exports = { testData };
+/**
+ * Get shipping address data for a specific locale
+ * @param {string} locale - Locale code (US, UK, EU, CA, AU)
+ * @returns {Object} Address data for the locale
+ */
+function getAddressByLocale(locale = 'US') {
+  const localeUpper = locale.toUpperCase();
+  return ADDRESSES[localeUpper] || ADDRESSES.US;
+}
+
+module.exports = {
+  testData,
+  ADDRESSES,
+  getAddressByLocale
+};

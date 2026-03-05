@@ -159,7 +159,7 @@ class ProductListingPage extends BasePage {
 
         await subCat.click({ force: true });
         await this.waitForPLP();
-        return;
+        return; 
       }
     }
 

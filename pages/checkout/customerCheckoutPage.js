@@ -1,9 +1,14 @@
 const CheckoutPage = require('./checkoutPage');
 const { settle } = require('../../utils/dynamicWait');
+const { TIMEOUTS, CHECKOUT_WAIT_TIMES } = require('../../config/constants');
+const { customerCheckoutLogs } = require('../../config/egoLogs');
 
 class CustomerCheckoutPage extends CheckoutPage {
   constructor(page) {
     super(page);
+    this.timeouts = TIMEOUTS;
+    this.waits = CHECKOUT_WAIT_TIMES;
+    this.logs = customerCheckoutLogs;
   }
 
   /* ---------- CUSTOMER SPECIFIC STEPS ---------- */
@@ -12,21 +17,21 @@ class CustomerCheckoutPage extends CheckoutPage {
     const emailInput = this.page.locator(this.locators.emailInput);
     await emailInput.waitFor({ state: 'visible', timeout: this.timeouts.large });
     await emailInput.fill(email);
-    console.log(`Customer email entered`);
+    console.log(this.logs.emailEntered);
   }
 
   async clickSignIn() {
     const signInBtn = this.page.locator(this.locators.signInButton).first();
     await signInBtn.waitFor({ state: 'visible', timeout: this.timeouts.large });
     await signInBtn.click();
-    console.log("Clicked sign in button");
+    console.log(this.logs.clickedSignIn);
   }
 
   async enterPassword(password) {
     const passwordInput = this.page.locator(this.locators.passwordInput).first();
     await passwordInput.waitFor({ state: 'visible', timeout: this.timeouts.large });
     await passwordInput.fill(password);
-    console.log("Password entered");
+    console.log(this.logs.passwordEntered);
 
     await passwordInput.press('Enter').catch(async () => {
       const signInBtn = this.page.locator(this.locators.signInButton).first();
@@ -35,8 +40,8 @@ class CustomerCheckoutPage extends CheckoutPage {
       }
     });
 
-    await this.page.waitForLoadState('networkidle', { timeout: this.config.waitTimes.authentication });
-    console.log("Login completed");
+    await this.page.waitForLoadState('networkidle', { timeout: this.waits.authentication });
+    console.log(this.logs.loginCompleted);
   }
 
   async selectSavedAddress() {
@@ -44,12 +49,12 @@ class CustomerCheckoutPage extends CheckoutPage {
 
     if (await savedAddress.isVisible({ timeout: this.timeouts.medium }).catch(() => false)) {
       await savedAddress.click();
-      console.log("Selected saved address");
+      console.log(this.logs.selectedSavedAddress);
     } else {
-      console.warn("No saved address found or visible");
+      console.warn(this.logs.noSavedAddress);
     }
 
-    await settle(this.page, this.config.waitTimes.autofillWait);
+    await settle(this.page, this.waits.autofillWait);
   }
 
   async verifyLoggedInState() {
@@ -60,20 +65,20 @@ class CustomerCheckoutPage extends CheckoutPage {
       .isVisible({ timeout: this.timeouts.medium }).catch(() => false);
 
     if (savedAddressVisible || shippingMethodVisible) {
-      console.log("User is logged in and on checkout page");
+      console.log(this.logs.loggedInCheckout);
       return true;
     }
 
-    console.warn("User may not be logged in properly");
+    console.warn(this.logs.loginUncertain);
     return false;
   }
 
   async completeCustomerCheckout(email, password, cardDetails) {
-    console.log("\n--- Starting Customer Checkout Flow ---");
+    console.log(this.logs.flowStart);
     await this.enterEmail(email);
     await this.clickSignIn();
     await this.enterPassword(password);
-    await settle(this.page, this.config.waitTimes.autofillWait);
+    await settle(this.page, this.waits.autofillWait);
     await this.selectSavedAddress();
     await this.clickShippingContinue();
     await this.selectShippingMethod();
@@ -81,7 +86,7 @@ class CustomerCheckoutPage extends CheckoutPage {
     await this.fillCardDetails(cardDetails);
     await this.clickPayNow();
     await this.verifyOrderConfirmation();
-    console.log("--- Customer Checkout Flow Completed ---\n");
+    console.log(this.logs.flowComplete);
   }
 }
 

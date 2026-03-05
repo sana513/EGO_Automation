@@ -1,7 +1,9 @@
 const ProductDetailPage = require('./pdpPage');
 const basePage = require('./basePage');
+const CheckoutAuthPage = require('./checkout/checkoutAuthPage');
 const { AddToCartLocators } = require('../locators/addToCartLocators');
 const { testData } = require('../config/testData');
+const { TIMEOUTS } = require('../config/constants');
 
 class AddToCartPage extends basePage {
   constructor(page) {
@@ -37,7 +39,7 @@ class AddToCartPage extends basePage {
 
   async updateQuantityRandomly() {
     const qtySelect = this.page.locator(this.updateQuantity);
-    await qtySelect.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
+    await qtySelect.waitFor({ state: 'visible', timeout: TIMEOUTS.medium });
 
     const options = await qtySelect.locator('option').allTextContents();
     const validOptions = options.filter(o => !isNaN(parseInt(o)));
@@ -93,34 +95,55 @@ class AddToCartPage extends basePage {
 
   async addProductToWishlist() {
     const wishlistBtn = this.page.locator(this.addToWishlist).first();
-    await wishlistBtn.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
+    await wishlistBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.medium });
     await wishlistBtn.click();
     const loginDrawer = this.page.locator('[data-testid="drawer"]');
 
     if (await loginDrawer.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const closeBtn = this.page.locator('#Capa_1');
-      await closeBtn.click();
-      await loginDrawer.waitFor({ state: 'hidden', timeout: testData.timeouts.medium });
+      const closeBtn = '#Capa_1';
+      await this.click(closeBtn);
+      await loginDrawer.waitFor({ state: 'hidden', timeout: TIMEOUTS.medium });
     }
   }
 
   async applyCoupon(code) {
     const couponInput = this.page.locator(this.couponInput);
-    await couponInput.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
+    await couponInput.waitFor({ state: 'visible', timeout: TIMEOUTS.medium });
     await couponInput.scrollIntoViewIfNeeded();
     await couponInput.fill(code);
 
     const submitBtn = this.page.locator(this.submitButton);
-    await submitBtn.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
+    await submitBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.medium });
     await submitBtn.click();
 
     console.log("Coupon applied successfully");
   }
 
   async proceedToCheckout() {
-    const checkoutBtn = this.page.locator(this.checkoutButton);
-    await checkoutBtn.waitFor({ state: 'visible', timeout: testData.timeouts.medium });
-    await checkoutBtn.click();
+    await this.click(this.checkoutButton);
+
+    await this.handleCheckoutAuthenticationPage();
+  }
+
+  async handleCheckoutAuthenticationPage() {
+    const { settle } = require('../utils/dynamicWait');
+    const env = process.env.ENV || 'stage';
+    await settle(this.page, 3000);
+
+    console.log(`[${env.toUpperCase()}] Checking for checkout authentication page...`);
+    console.log(`Current URL: ${this.page.url()}`);
+    const authPage = new CheckoutAuthPage(this.page);
+    const isAuthPage = await authPage.isOnAuthPage();
+
+    if (isAuthPage) {
+      console.log(`[${env.toUpperCase()}] ✓ Checkout authentication page detected`);
+      const timestamp = Date.now();
+      const guestEmail = `test.guest.${timestamp}@example.com`;
+
+      await authPage.checkoutAsGuest(guestEmail);
+    } else {
+      console.log(`[${env.toUpperCase()}] No authentication page detected - already on checkout`);
+    }
   }
 }
 

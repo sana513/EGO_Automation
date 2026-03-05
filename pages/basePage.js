@@ -215,6 +215,35 @@ class BasePage {
       if (value !== '') await this.fill(selector, value);
     }
   }
+
+  async stableAction(target, action = 'click', value = null, options = {}) {
+    const maxRetries = 3;
+    const defaultTimeout = options.timeout || 10000;
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        await this.closeModalIfPresent();
+        const el = this.resolve(target);
+
+        await el.waitFor({ state: 'visible', timeout: defaultTimeout });
+        await el.scrollIntoViewIfNeeded().catch(() => {});
+        await settle(this.page, 300);
+
+        if (action === 'click') {
+          await el.click({ timeout: defaultTimeout, ...options });
+        } else if (action === 'fill' && value !== null) {
+          await el.fill(value, { timeout: defaultTimeout, ...options });
+        } else if (action === 'hover') {
+          await el.hover({ timeout: defaultTimeout, ...options });
+        }
+
+        return;
+      } catch (e) {
+        if (i === maxRetries - 1) throw e;
+        await settle(this.page, 500);
+      }
+    }
+  }
 }
 
 module.exports = BasePage;

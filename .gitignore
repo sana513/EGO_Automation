@@ -29,4 +29,5 @@ screenshots/
 package-lock.json
 
 # Reports
-reports/    
+reports/ 
+antigravity/context.json   
