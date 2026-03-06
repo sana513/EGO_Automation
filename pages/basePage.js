@@ -2,6 +2,7 @@ const { getBaseUrl } = require('../config/config');
 const { BaseLocators } = require('../locators/baseLocators');
 const { testData } = require('../config/testData');
 const { waitForNetworkSettled, settle } = require('../utils/dynamicWait');
+const { isUKLocale } = require('../features/support/utils');
 
 class BasePage {
   constructor(page) {
@@ -23,7 +24,7 @@ class BasePage {
 
   async closeModalIfPresent(isInitial = false) {
     const url = this.page.url();
-    const isUK = /\/(uk|eu)|\.co\.uk/.test(url);
+    const isUK = isUKLocale(url);
 
     if (isUK && (isInitial || !global.cookieHandled)) {
       await this.handleCookieConsent(isInitial);
@@ -50,7 +51,7 @@ class BasePage {
   async handleCookieConsent(isInitial = false) {
     try {
       const url = this.page.url();
-      const isUK = /\/(uk|eu)|\.co\.uk/.test(url);
+      const isUK = isUKLocale(url);
 
       if (!isUK) {
         global.cookieHandled = true;

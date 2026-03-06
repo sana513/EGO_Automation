@@ -14,7 +14,9 @@ const pdpLabels = {
     notifyMe: 'Notify Me',
     addToBag: 'Add to Bag',
     soldOut: 'sold out',
-    outOfStock: 'out of stock'
+    outOfStock: 'out of stock',
+    itemOOS: 'Item Out Of Stock',
+    addAllToBag: 'ADD ALL TO BAG'
 };
 
 // ---------- CHECKOUT ----------
@@ -75,7 +77,11 @@ const searchLabels = {
     placeholder: "Search...",
     noResultsMessage: "Products Matching|0 STYLES",
     trendingHeader: "Trending Categories|Trending",
-    outOfStockPattern: "Sold Out|Out of Stock"
+    outOfStockPattern: "Sold Out|Out of Stock",
+    noResultsPatterns: {
+        zeroStyles: "0 styles",
+        noProducts: "no products"
+    }
 };
 
 // ---------- HOMEPAGE ----------
@@ -101,7 +107,44 @@ const registrationLabels = {
         uk: "United Kingdom",
         au: "Australia",
         eu: "Belgium"
+    },
+    fields: {
+        email: "Email",
+        firstName: "First Name",
+        lastName: "Last Name",
+        password: "Password",
+        confirmPassword: "Confirm Password",
+        street: "Street",
+        city: "City",
+        postCode: "Post Code",
+        state: "State"
+    },
+    urls: {
+        signupFragment: "/signup"
     }
+};
+
+// ---------- LOGIN ----------
+const loginLabels = {
+    locales: {
+        uk: 'uk',
+        eu: 'eu',
+        au: 'au',
+        us: 'us'
+    },
+    urls: {
+        myAccount: '**/my-account/**'
+    }
+};
+
+// ---------- ADD TO CART ----------
+const addToCartLabels = {
+    outOfStock: 'out of stock'
+};
+
+// ---------- PLP ----------
+const plpLabels = {
+    subCategoryFilterIgnore: /view all|shop all/i
 };
 
 module.exports = {
@@ -111,5 +154,8 @@ module.exports = {
     searchLabels,
     homepageLabels,
     cartLabels,
-    registrationLabels
+    registrationLabels,
+    loginLabels,
+    addToCartLabels,
+    plpLabels
 };

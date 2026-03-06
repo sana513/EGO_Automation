@@ -3,6 +3,7 @@ const basePage = require("./basePage");
 const { HomePageLocators } = require("../locators/homePageLocators");
 const { testData } = require("../config/testData");
 const { settle } = require("../utils/dynamicWait");
+const { getRandomIndex } = require("../features/support/utils");
 
 class HomePage extends basePage {
   constructor(page) {
@@ -10,7 +11,6 @@ class HomePage extends basePage {
   }
 
   async open(country = null) {
-    // Use LOCALE from environment if set, otherwise use country parameter or default to 'us'
     const locale = process.env.LOCALE || country || 'us';
     await this.navigate(this.getBaseUrl(locale));
   }
@@ -121,7 +121,7 @@ class HomePage extends basePage {
 
     if (!visibleIndexes.length) throw new Error("No visible ADD CTA found in What's Hot section");
 
-    const randomIndex = visibleIndexes[Math.floor(Math.random() * visibleIndexes.length)];
+    const randomIndex = visibleIndexes[getRandomIndex(visibleIndexes.length)];
     await buttons.nth(randomIndex).click();
   }
 

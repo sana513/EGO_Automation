@@ -7,6 +7,7 @@ const { TIMEOUTS, CHECKOUT_WAIT_TIMES } = require('../../config/constants');
 const { checkoutLogs } = require('../../config/egoLogs');
 const { checkoutLabels } = require('../../config/egoLabels');
 const { settle, clickWhenReady, safeFill } = require('../../utils/dynamicWait');
+const { getRandomIndex } = require('../../features/support/utils');
 const PaymentMethods = require('../paymentMethods/payByCard');
 
 class CheckoutPage extends BasePage {
@@ -43,7 +44,7 @@ class CheckoutPage extends BasePage {
         console.log(this.logs.selectingShippingMethod);
         const methods = await this.page.locator(this.locators.shippingMethodRadio).all();
         if (methods.length === 1) await methods[0].click({ force: true });
-        else if (methods.length > 1) await methods[Math.floor(Math.random() * methods.length)].click({ force: true });
+        else if (methods.length > 1) await methods[getRandomIndex(methods.length)].click({ force: true });
         else console.warn(this.logs.noShippingMethods);
         await settle(this.page, this.waits.shippingMethodSelection);
     }

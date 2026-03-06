@@ -1,9 +1,12 @@
-const ProductDetailPage = require('./pdpPage');
+const ProductDetailPage = require('./ProductDetailPage/pdpPage');
 const basePage = require('./basePage');
 const CheckoutAuthPage = require('./checkout/checkoutAuthPage');
 const { AddToCartLocators } = require('../locators/addToCartLocators');
 const { testData } = require('../config/testData');
 const { TIMEOUTS } = require('../config/constants');
+const { generateGuestEmail, getRandomIndex } = require('../features/support/utils');
+const { addToCartLogs } = require('../config/egoLogs');
+const { addToCartLabels } = require('../config/egoLabels');
 
 class AddToCartPage extends basePage {
   constructor(page) {
@@ -44,14 +47,13 @@ class AddToCartPage extends basePage {
     const options = await qtySelect.locator('option').allTextContents();
     const validOptions = options.filter(o => !isNaN(parseInt(o)));
 
-    const randomQty =
-      validOptions[Math.floor(Math.random() * validOptions.length)];
+    const randomQty = validOptions[getRandomIndex(validOptions.length)];
 
     await qtySelect.selectOption(randomQty);
   }
 
   async updateSizeRandomly() {
-    console.log("Starting cart size update...");
+    console.log(addToCartLogs.startingSizeUpdate);
 
     const sizeSelects = this.page.locator(this.updateSize);
     const count = await sizeSelects.count();
@@ -73,23 +75,23 @@ class AddToCartPage extends basePage {
     for (const option of options) {
       const disabled = await option.getAttribute('disabled');
       const text = (await option.textContent())?.trim() || '';
-      if (!disabled && !text.toLowerCase().includes(testData.cart.labels.outOfStock) && text !== '') {
+      if (!disabled && !text.toLowerCase().includes(addToCartLabels.outOfStock) && text !== '') {
         const value = await option.getAttribute('value');
         availableOptions.push({ text, value });
       }
     }
 
     if (availableOptions.length === 0) {
-      console.warn('No additional available sizes found in cart. Skipping size update.');
+      console.warn(addToCartLogs.noAvailableSizes);
       return;
     }
 
-    const randomIndex = Math.floor(Math.random() * availableOptions.length);
+    const randomIndex = getRandomIndex(availableOptions.length);
     const randomSize = availableOptions[randomIndex];
 
-    console.log(`Selecting cart size: ${randomSize.text}`);
+    console.log(`${addToCartLogs.selectingCartSize} ${randomSize.text}`);
     await targetSelect.selectOption({ value: randomSize.value });
-    console.log(`Successfully selected cart size: ${randomSize.text}`);
+    console.log(`${addToCartLogs.selectedCartSize} ${randomSize.text}`);
   }
 
 
@@ -116,7 +118,7 @@ class AddToCartPage extends basePage {
     await submitBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.medium });
     await submitBtn.click();
 
-    console.log("Coupon applied successfully");
+    console.log(addToCartLogs.couponApplied);
   }
 
   async proceedToCheckout() {
@@ -130,19 +132,18 @@ class AddToCartPage extends basePage {
     const env = process.env.ENV || 'stage';
     await settle(this.page, 3000);
 
-    console.log(`[${env.toUpperCase()}] Checking for checkout authentication page...`);
-    console.log(`Current URL: ${this.page.url()}`);
+    console.log(`[${env.toUpperCase()}] ${addToCartLogs.checkingAuthPage}`);
+    console.log(`${addToCartLogs.currentUrl} ${this.page.url()}`);
     const authPage = new CheckoutAuthPage(this.page);
     const isAuthPage = await authPage.isOnAuthPage();
 
     if (isAuthPage) {
-      console.log(`[${env.toUpperCase()}] ✓ Checkout authentication page detected`);
-      const timestamp = Date.now();
-      const guestEmail = `test.guest.${timestamp}@example.com`;
+      console.log(`[${env.toUpperCase()}] ${addToCartLogs.authPageDetected}`);
+      const guestEmail = generateGuestEmail();
 
       await authPage.checkoutAsGuest(guestEmail);
     } else {
-      console.log(`[${env.toUpperCase()}] No authentication page detected - already on checkout`);
+      console.log(`[${env.toUpperCase()}] ${addToCartLogs.noAuthPageDetected}`);
     }
   }
 }

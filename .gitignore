@@ -30,4 +30,8 @@ package-lock.json
 
 # Reports
 reports/ 
-antigravity/context.json   
+# Windsurf
+.windsurf/context.json   
+
+#readme
+readme.txt

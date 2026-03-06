@@ -5,11 +5,12 @@ const { TIMEOUTS, REGISTRATION_WAIT_TIMES } = require("../config/constants");
 const { registrationLogs } = require("../config/egoLogs");
 const { registrationLabels } = require("../config/egoLabels");
 const { settle } = require("../utils/dynamicWait");
+const { generateRandomDOB } = require("../features/support/utils");
 
 class SignupPage extends BasePage {
   constructor(page) {
     super(page);
-    if (!page) throw new Error("Page instance is required to initialize SignupPage");
+    if (!page) throw new Error(this.logs.pageRequired);
     this.page = page;
     this.sl = SignupLocators.signupPage;
     this.logs = registrationLogs;
@@ -29,7 +30,7 @@ class SignupPage extends BasePage {
   }
 
   async setActiveForm() {
-    if (!this.page) throw new Error("Page is not initialized");
+    if (!this.page) throw new Error(this.logs.pageNotInitialized);
 
     const drawer = this.registerDrawer();
     await drawer.waitFor({ state: "visible", timeout: TIMEOUTS.extreme });
@@ -57,7 +58,7 @@ class SignupPage extends BasePage {
   }
 
   async navigateToSignup() {
-    if (!this.page) throw new Error("Page is not initialized");
+    if (!this.page) throw new Error(this.logs.pageNotInitialized);
     console.log(this.logs.navigating);
     await this.page.context().clearCookies();
     await this.page.evaluate(() => localStorage.clear());
@@ -113,24 +114,20 @@ class SignupPage extends BasePage {
   }
 
   async fillPersonalDetails(details) {
-    if (details["Email"]) await this.enterInitialEmail(details["Email"]);
+    if (details[this.labels.fields.email]) await this.enterInitialEmail(details[this.labels.fields.email]);
     if (!this.activeForm) await this.setActiveForm();
 
-    if (details["First Name"]) await this.firstNameInput.fill(details["First Name"]);
-    if (details["Last Name"]) await this.lastNameInput.fill(details["Last Name"]);
-    if (details["Password"]) await this.passwordInput.fill(details["Password"]);
-    if (details["Confirm Password"]) await this.confirmPasswordInput.fill(details["Confirm Password"]);
+    if (details[this.labels.fields.firstName]) await this.firstNameInput.fill(details[this.labels.fields.firstName]);
+    if (details[this.labels.fields.lastName]) await this.lastNameInput.fill(details[this.labels.fields.lastName]);
+    if (details[this.labels.fields.password]) await this.passwordInput.fill(details[this.labels.fields.password]);
+    if (details[this.labels.fields.confirmPassword]) await this.confirmPasswordInput.fill(details[this.labels.fields.confirmPassword]);
     console.log(this.logs.personalDetailsFilled);
   }
 
   async setDOB() {
     if (!this.activeForm) await this.setActiveForm();
 
-    const dayVal = Math.floor(Math.random() * 28) + 1;
-    const day = dayVal < 10 ? `0${dayVal}` : dayVal.toString();
-    const months = this.labels.months;
-    const month = months[Math.floor(Math.random() * months.length)];
-    const year = (Math.floor(Math.random() * (2000 - 1950 + 1)) + 1950).toString();
+    const { day, month, year } = generateRandomDOB();
 
     await this.dob.day.waitFor({ state: "visible", timeout: TIMEOUTS.medium });
     await this.dob.day.selectOption(day);
@@ -169,14 +166,14 @@ class SignupPage extends BasePage {
 
   async enterAddress(details) {
     if (!this.activeForm) await this.setActiveForm();
-    if (details["Street"]) await this.streetInput.fill(details["Street"]);
-    if (details["City"]) await this.cityInput.fill(details["City"]);
-    if (details["Post Code"]) await this.postCodeInput.fill(details["Post Code"]);
+    if (details[this.labels.fields.street]) await this.streetInput.fill(details[this.labels.fields.street]);
+    if (details[this.labels.fields.city]) await this.cityInput.fill(details[this.labels.fields.city]);
+    if (details[this.labels.fields.postCode]) await this.postCodeInput.fill(details[this.labels.fields.postCode]);
 
-    if (details["State"]) {
+    if (details[this.labels.fields.state]) {
       const stateVisible = await this.stateInput.isVisible().catch(() => false);
       if (stateVisible) {
-        await this.stateInput.selectOption({ label: details["State"] });
+        await this.stateInput.selectOption({ label: details[this.labels.fields.state] });
       }
     }
     console.log(this.logs.addressFilled);
@@ -221,41 +218,62 @@ class SignupPage extends BasePage {
     await this.submitButton.waitFor({ state: 'visible', timeout: TIMEOUTS.medium });
     await this.submitButton.click();
 
-    // Wait for URL to change away from signup
     console.log(this.logs.waitingForRedirect);
     try {
-      await this.page.waitForURL(url => !url.href.includes('/signup'), {
-        timeout: this.waits.navigationTimeout || 15000
+      await this.page.waitForURL(url => {
+        const href = url.href.toLowerCase();
+        const isNotSignup = !href.includes(this.labels.urls.signupFragment.toLowerCase());
+        const isDashboard = href.includes('my-account') || href.includes('dashboard') || href.includes('account');
+        return isNotSignup || isDashboard;
+      }, {
+        timeout: this.waits.navigationTimeout || 20000
       });
       console.log(this.logs.redirectSuccess, this.page.url());
     } catch (e) {
-      const currentUrl = this.page.url();
-      if (currentUrl.includes('/signup')) {
+      const currentUrl = this.page.url().toLowerCase();
+      if (currentUrl.includes(this.labels.urls.signupFragment.toLowerCase())) {
         console.error(this.logs.registrationTimeout);
 
-        // Extract all visible error texts
-        const errorSelectors = this.sl.errorSelectors;
+        const errorSelectors = [
+          ...this.sl.errorSelectors,
+          '[class*="text-red"]',
+          '[class*="errorMessage"]',
+          '[class*="field-error"]',
+          '.invalid-feedback'
+        ];
 
         let foundErrors = [];
         for (const selector of errorSelectors) {
-          const elements = await this.page.locator(selector).all();
-          for (const el of elements) {
-            if (await el.isVisible()) {
+          try {
+            const elements = await this.page.locator(selector).all();
+            for (const el of elements) {
+              if (await el.isVisible().catch(() => false)) {
+                const text = await el.textContent().catch(() => '');
+                if (text && text.trim()) foundErrors.push(text.trim());
+              }
+            }
+          } catch (e) {
+          }
+        }
+
+        if (foundErrors.length === 0) {
+          const commonErrorTexts = ['Invalid', 'Required', 'Error', 'Failed', 'already exists'];
+          for (const errorText of commonErrorTexts) {
+            const el = this.page.locator(`text=${errorText}`).first();
+            if (await el.isVisible().catch(() => false)) {
               const text = await el.textContent().catch(() => '');
               if (text && text.trim()) foundErrors.push(text.trim());
             }
           }
         }
 
-        // De-duplicate errors
         foundErrors = [...new Set(foundErrors)];
 
         if (foundErrors.length > 0) {
           console.error(this.logs.validationErrorsFound, foundErrors);
-          throw new Error(`Registration failed with errors: ${foundErrors.join(' | ')}`);
+          throw new Error(`${this.logs.registrationFailedErrors}${foundErrors.join(' | ')}`);
         } else {
-          // If no errors found, log all visible text in the form container
-          const formText = await this.activeForm.innerText().catch(() => 'Could not read form text');
+          const formText = await this.activeForm.innerText().catch(() => this.logs.couldNotReadFormText);
           console.error(this.logs.formStateFailure, formText);
           throw new Error(this.logs.registrationFailed);
         }

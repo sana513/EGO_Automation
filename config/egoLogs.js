@@ -40,7 +40,25 @@ const pdpLogs = {
     noAvailableSizeError: 'No available size found (all sizes are "Notify Me" or disabled)',
     selectedSize: 'Selected size:',
     failedFindProduct: 'Failed to find an available product after',
-    failedSearchProduct: 'Failed to find an available search product after'
+    failedSearchProduct: 'Failed to find an available search product after',
+    selectingAvailableSize: 'Selecting available size...',
+    oneSizeDetected: 'One-size product detected. No size selection needed.',
+    sizeNotFoundMulti: 'Size selector not found for multi-size product.',
+    selectingRandomSize: 'Selecting random available size...',
+    noSizeSelector: 'No size selector found on page',
+    noAvailableSizesNative: 'No available sizes found in native select.',
+    noAvailableSizesCustom: 'No available sizes found in custom dropdown.',
+    detectedNativeSelect: 'Detected',
+    detectedCustomDropdown: 'Detected custom UI dropdown',
+    cannotOpenDropdown: 'Cannot open size dropdown - page has blocking overlay (likely out of stock)',
+    dropdownNotOpen: 'Size dropdown did not open - options not visible',
+    sizeOptionsNotLoad: 'Size options did not load within timeout:',
+    selectedSizeNative: 'Selected size:',
+    sizeFoundDisabled: 'Size',
+    sizeNotFoundInNative: 'Size',
+    sizeNotFoundInCustom: 'Size',
+    productAddedToBag: 'Product added to bag.',
+    cartPageOpened: 'Cart page opened.'
 };
 
 // ---------- CHECKOUT ----------
@@ -135,7 +153,62 @@ const registrationLogs = {
     registrationTimeout: "Registration failed: Still on signup page after timeout",
     validationErrorsFound: "Validation errors found:",
     formStateFailure: "Form state at failure:",
-    registrationFailed: "Registration failed: Still on signup page without visible error messages."
+    registrationFailed: "Registration failed: Still on signup page without visible error messages.",
+    pageRequired: "Page instance is required to initialize SignupPage",
+    pageNotInitialized: "Page is not initialized",
+    registrationFailedErrors: "Registration failed with errors: ",
+    couldNotReadFormText: "Could not read form text"
 };
 
-module.exports = { checkoutAuthLogs, pdpLogs, checkoutLogs, guestCheckoutLogs, customerCheckoutLogs, registrationLogs };
+// ---------- LOGIN ----------
+const loginLogs = {
+    navigatingToUrl: "Navigating to dynamic URL:",
+    waitingCookieBanner: "Locale is",
+    performingLogin: "Performing login with:"
+};
+
+// ---------- ADD TO CART ----------
+const addToCartLogs = {
+    startingSizeUpdate: "Starting cart size update...",
+    noAvailableSizes: "No additional available sizes found in cart. Skipping size update.",
+    selectingCartSize: "Selecting cart size:",
+    selectedCartSize: "Successfully selected cart size:",
+    couponApplied: "Coupon applied successfully",
+    checkingAuthPage: "Checking for checkout authentication page...",
+    currentUrl: "Current URL:",
+    authPageDetected: "✓ Checkout authentication page detected",
+    noAuthPageDetected: "No authentication page detected - already on checkout"
+};
+
+// ---------- SEARCH ----------
+const searchLogs = {
+    noResultsTimeout: "No search results or no-results message appeared within expected time.",
+    noTrendingItems: "Neither trending header nor items appeared in search overlay",
+    noSearchResults: "No search results found to open"
+};
+
+// ---------- PLP ----------
+const plpLogs = {
+    requestedStartIndex: (startIndex, count) => `Requested start index ${startIndex} but only ${count} products found. Skipping.`,
+    verifyingProducts: (verifyLimit, startIndex) => `Verifying ${verifyLimit} products starting from index ${startIndex}`,
+    verifiedProducts: (count) => `Verified ${count} products`,
+    noAdditionalProducts: 'No additional products loaded',
+    noCategoriesRetry: (retry) => `No main categories found, retry ${retry + 1}/5...`,
+    noCategoriesError: 'No main categories found after 5 retries. Page may not be fully loaded.',
+    checkingCategory: (i, catText) => `Checking category ${i}: ${catText}`,
+    foundSubcategories: (subCount, catText, subText, randomSubIndex) => `Found ${subCount} subcategories in "${catText}". Picking random: "${subText.trim()}" at index ${randomSubIndex}`,
+    noVisibleSubcategories: 'No visible subcategories found in any main category',
+    noProductsFound: 'No products found on PLP',
+    indexOutOfBounds: (index, count) => `Index ${index} out of bounds. Total products: ${count}`,
+    openingRandomProduct: (randomIndex, count) => `Opening random product at index ${randomIndex} of ${count}`,
+    noMainCategories: 'No main categories found',
+    hoveringMainCategory: (mainText, attempt, maxAttempts) => `Hovering over main category: ${mainText} (attempt ${attempt}/${maxAttempts})`,
+    foundVisibleSubcategories: (subCount) => `Found ${subCount} visible subcategories`,
+    noSubcategoriesRetry: (mainText) => `No subcategories for "${mainText}". Retrying...`,
+    noSubcategoriesError: (mainText, maxAttempts) => `No visible subcategories found for "${mainText}" after ${maxAttempts} attempts. The menu may not have loaded properly.`,
+    subcategoryIndexOutOfBounds: (subIndex) => `Subcategory index ${subIndex} out of bounds`,
+    clickingSubcategory: (subText, href) => `Clicking subcategory: ${subText} (${href})`,
+    noMainCategoriesStructure: 'No main categories found for navigation structure'
+};
+
+module.exports = { checkoutAuthLogs, pdpLogs, checkoutLogs, guestCheckoutLogs, customerCheckoutLogs, registrationLogs, loginLogs, addToCartLogs, searchLogs, plpLogs };

@@ -4,6 +4,8 @@ const { testData } = require("../config/testData");
 const { TIMEOUTS } = require("../config/constants");
 const { expect } = require("@playwright/test");
 const { settle } = require("../utils/dynamicWait");
+const { searchLogs } = require("../config/egoLogs");
+const { searchLabels } = require("../config/egoLabels");
 
 class SearchPage extends BasePage {
   constructor(page) {
@@ -40,7 +42,7 @@ class SearchPage extends BasePage {
         this.page.locator(SearchLocators.noResultsMessage).first().waitFor({ state: "visible", timeout: TIMEOUTS.xlarge })
       ]);
     } catch {
-      console.warn("No search results or no-results message appeared within expected time.");
+      console.warn(searchLogs.noResultsTimeout);
     }
   }
 
@@ -78,7 +80,7 @@ class SearchPage extends BasePage {
     let found = false;
     for (let i = 0; i < count; i++) {
       const text = await noResults.nth(i).innerText();
-      if (text.toLowerCase().includes("0 styles") || text.toLowerCase().includes("no products")) {
+      if (text.toLowerCase().includes(searchLabels.noResultsPatterns.zeroStyles) || text.toLowerCase().includes(searchLabels.noResultsPatterns.noProducts)) {
         found = true;
         break;
       }
@@ -100,7 +102,7 @@ class SearchPage extends BasePage {
       header.first().waitFor({ state: "visible", timeout: 15000 }),
       items.first().waitFor({ state: "visible", timeout: 15000 })
     ]).catch(() => {
-      throw new Error("Neither trending header nor items appeared in search overlay");
+      throw new Error(searchLogs.noTrendingItems);
     });
   }
 
@@ -129,7 +131,7 @@ class SearchPage extends BasePage {
     await results.first().waitFor({ state: "visible", timeout: TIMEOUTS.large });
 
     const count = await results.count();
-    if (count === 0) throw new Error("No search results found to open");
+    if (count === 0) throw new Error(searchLogs.noSearchResults);
     if (index >= count) index = count - 1;
 
     await results.nth(index).click();

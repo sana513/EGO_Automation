@@ -5,6 +5,7 @@ const { LoginLocators } = require("../locators/loginLocators");
 const { testData } = require("../config/testData");
 const { TIMEOUTS } = require("../config/constants");
 const { settle } = require("../utils/dynamicWait");
+const { isLocaleInList } = require("../features/support/utils");
 
 class LogoutPage extends BasePage {
   constructor(page) {
@@ -33,7 +34,7 @@ class LogoutPage extends BasePage {
   }
 
   async clickLogout() {
-    const isUK = ["uk", "eu"].includes(process.env.LOCALE || "us");
+    const isUK = isLocaleInList(process.env.LOCALE || "us", ["uk", "eu"]);
     await this.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await settle(this.page, isUK ? 800 : 500);
 
