@@ -2,6 +2,9 @@ const BasePage = require("./basePage");
 const { LoginLocators } = require("../locators/loginLocators");
 const { testData } = require("../config/testData");
 const { TIMEOUTS } = require("../config/constants");
+const { loginLogs } = require("../config/egoLogs");
+const { loginLabels } = require("../config/egoLabels");
+const { isLocaleInList } = require("../features/support/utils");
 
 class LoginPage extends BasePage {
   constructor(page) {
@@ -24,7 +27,7 @@ class LoginPage extends BasePage {
 
   async navigateToLocale(locale) {
     const targetUrl = this.getBaseUrl(locale);
-    console.log(`Navigating to dynamic URL: ${targetUrl}`);
+    console.log(`${loginLogs.navigatingToUrl} ${targetUrl}`);
     await this.navigate(targetUrl);
     await this.page.waitForLoadState("domcontentloaded");
     await this.closePopupIfPresent();
@@ -41,10 +44,10 @@ class LoginPage extends BasePage {
   }
 
   async openLoginModal() {
-    const currentLocale = process.env.LOCALE || 'us';
+    const currentLocale = process.env.LOCALE || loginLabels.locales.us;
 
-    if (['uk', 'eu', 'au'].includes(currentLocale)) {
-      console.log(`Locale is ${currentLocale}, waiting for cookie banner...`);
+    if (isLocaleInList(currentLocale, [loginLabels.locales.uk, loginLabels.locales.eu, loginLabels.locales.au])) {
+      console.log(`${loginLogs.waitingCookieBanner} ${currentLocale}, waiting for cookie banner...`);
       await this.page.waitForTimeout(3000);
       await this.handleCookieConsent(true);
     } else {
@@ -57,15 +60,15 @@ class LoginPage extends BasePage {
   }
 
   async performLogin(email = testData.login.email, password = testData.login.password) {
-    console.log(`Performing login with: ${email}`);
+    console.log(`${loginLogs.performingLogin} ${email}`);
     await this.emailInput.first().fill(email);
     await this.passwordInput.first().fill(password);
     await this.submitButton.first().click();
-    await this.page.waitForURL("**/my-account/**", { timeout: TIMEOUTS.huge });
+    await this.page.waitForURL(loginLabels.urls.myAccount, { timeout: TIMEOUTS.huge });
   }
 
   async isOnAccountPage() {
-    return this.page.url().includes("my-account");
+    return this.page.url().includes(loginLabels.urls.myAccount.replace('**/', '').replace('/**', ''));
   }
 }
 
