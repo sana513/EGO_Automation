@@ -43,7 +43,6 @@ class GuestCheckoutPage extends CheckoutPage {
 
     if (env === 'dev') {
       console.log('[DEV] Already on shipping form after authentication, skipping continue button');
-      // On dev, we need to ensure the form is loaded before proceeding
       await this.page.locator(this.locators.shipping.firstNameInput).first().waitFor({ state: 'visible', timeout: this.timeouts.large }).catch(() => { });
       await settle(this.page, 2000);
       return;
@@ -62,7 +61,7 @@ class GuestCheckoutPage extends CheckoutPage {
         found = true;
         break;
       } catch (e) {
-        // Continue to next selector
+        
       }
     }
 
@@ -110,7 +109,6 @@ class GuestCheckoutPage extends CheckoutPage {
     await this.fill(this.locators.shipping.cityInput, data.city);
     await this.fill(this.locators.shipping.postCodeInput, data.postCode);
 
-    // Wait for country dropdown to be visible and enabled
     const countrySelect = this.page.locator(this.locators.shipping.countrySelect);
 
     console.log('Waiting for country dropdown...');
@@ -120,7 +118,6 @@ class GuestCheckoutPage extends CheckoutPage {
     await countrySelect.scrollIntoViewIfNeeded().catch(() => { });
     await settle(this.page, 1000);
 
-    // Check if visible
     const isVisible = await countrySelect.isVisible();
     console.log(`Country dropdown visible: ${isVisible}`);
 

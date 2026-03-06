@@ -71,7 +71,6 @@ class CheckoutPage extends BasePage {
     }
 
     async clickPayNow() {
-        // Check for and click terms and conditions checkbox if present
         const termsCheckbox = this.page.locator(this.locators.termsCheckbox);
         const termsVisible = await termsCheckbox.isVisible({ timeout: 3000 }).catch(() => false);
 
@@ -79,7 +78,6 @@ class CheckoutPage extends BasePage {
             const isChecked = await termsCheckbox.isChecked();
             if (!isChecked) {
                 console.log(this.logs.clickingTerms);
-                // Use force click since label intercepts pointer events
                 await termsCheckbox.click({ force: true });
                 await settle(this.page, 500);
                 console.log(this.logs.termsAccepted);
@@ -92,7 +90,6 @@ class CheckoutPage extends BasePage {
         await settle(this.page, 2000);
         console.log(this.logs.payNowClicked);
 
-        // Handle 3D Secure authentication if present
         await this.handle3DSecure();
     }
 
@@ -100,7 +97,6 @@ class CheckoutPage extends BasePage {
         console.log(this.logs.checking3DS);
         await settle(this.page, 5000);
 
-        // Check if we're on 3DS authentication page by URL or title
         let currentUrl = this.page.url().toLowerCase();
         let currentTitle = (await this.page.title()).toLowerCase();
 
@@ -110,12 +106,9 @@ class CheckoutPage extends BasePage {
         if (is3DSPage) {
             console.log(`${this.logs.dsPageDetected} ${currentUrl}, Title: ${currentTitle}`);
 
-            // Wait for page to fully load through redirects
             console.log(this.logs.waiting3DSLoad);
             await this.page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => { });
             await settle(this.page, 5000);
-
-            // Update URL and title after redirects
             currentUrl = this.page.url();
             currentTitle = await this.page.title();
             console.log(`${this.logs.final3DSPage} ${currentUrl}, Title: ${currentTitle}`);
@@ -136,7 +129,6 @@ class CheckoutPage extends BasePage {
                 }
             }
 
-            // If iframe found, work within iframe context, otherwise use main page
             const context = frameContext || this.page;
 
             let inputFound = false;
@@ -153,7 +145,6 @@ class CheckoutPage extends BasePage {
 
                     await settle(this.page, 1000);
 
-                    // Look for submit button in same context
                     let submitBtnClicked = false;
                     for (const btnSelector of this.locators.threeDSecure.submitButtons) {
                         const btn = context.locator(btnSelector).first();
@@ -176,7 +167,6 @@ class CheckoutPage extends BasePage {
                 console.log(this.logs.inputNotFound);
             }
 
-            // Wait for navigation back to order confirmation
             await this.page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => { });
             await settle(this.page, 3000);
             console.log(this.logs.authCompleted);

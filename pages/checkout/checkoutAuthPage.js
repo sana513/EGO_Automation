@@ -6,11 +6,6 @@ const { CHECKOUT_AUTH_TIMEOUTS } = require('../../config/constants');
 const { checkoutAuthLogs } = require('../../config/egoLogs');
 const { checkoutAuthLabels } = require('../../config/egoLabels');
 
-/**
- * Checkout Authentication Page (Dev Environment Only)
- * This page appears on dev environment after clicking "Checkout Securely"
- * Users can either checkout as guest or sign in
- */
 class CheckoutAuthPage extends BasePage {
   constructor(page) {
     super(page);
@@ -18,12 +13,8 @@ class CheckoutAuthPage extends BasePage {
     this.timeouts = CHECKOUT_AUTH_TIMEOUTS;
     this.logs = checkoutAuthLogs;
     this.labels = checkoutAuthLabels;
-
-    // Guest checkout locators
     this.guestEmailInput = CheckoutLocators.checkoutAsGuestEmailInput;
     this.guestButton = CheckoutLocators.checkoutAsGuestButton;
-
-    // Sign in locators
     this.signInEmailInput = CheckoutLocators.signInEmailInput;
     this.signInPasswordInput = CheckoutLocators.signInPasswordInput;
     this.signInButton = CheckoutLocators.signInAndCheckoutButton;
