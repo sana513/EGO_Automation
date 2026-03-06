@@ -56,8 +56,6 @@ class MultiSizeProductPage {
             state: 'visible',
             timeout: testData.timeouts.medium
         });
-
-        // Check for overlay that might block clicks (common on OOS pages)
         const overlay = this.page.locator(this.blockingOverlay);
         if (await overlay.isVisible().catch(() => false)) {
             throw new Error(this.logs.cannotOpenDropdown);
@@ -65,7 +63,6 @@ class MultiSizeProductPage {
 
         await dropdown.click();
         
-        // Wait for dropdown animation to complete
         await this.page.waitForTimeout(800);
     }
 
@@ -73,14 +70,12 @@ class MultiSizeProductPage {
 
         const sizeItems = this.page.locator(this.sizeOptions);
 
-        // Wait for size options to appear with increased timeout
         try {
             await sizeItems.first().waitFor({
                 state: 'visible',
                 timeout: testData.timeouts.xlarge
             });
         } catch (error) {
-            // If size options don't appear, check if dropdown is actually open
             const dropdownOpen = await this.page.locator(this.dropdownList).isVisible().catch(() => false);
             if (!dropdownOpen) {
                 throw new Error(this.logs.dropdownNotOpen);
